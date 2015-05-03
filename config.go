@@ -61,15 +61,10 @@ func ExpandUser(path string) (exPath string, err error) {
 		return
 	}
 
-	dir := usr.HomeDir
+	dir := fmt.Sprintf("%s/", usr.HomeDir)
 
-	if path[:2] == "~/" {
-		exPath = strings.Replace(path, "~/", dir, 1)
-	} else if path[:5] == "$HOME" {
-		exPath = strings.Replace(path, "$HOME", dir, 1)
-	} else {
-		err = errors.New("No expandable path provided.")
-	}
+	exPath = strings.Replace(path, "~/", dir, 1)
+	exPath = strings.Replace(exPath, "$HOME", dir, 1)
 
 	if err != nil {
 		return "", err
