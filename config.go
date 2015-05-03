@@ -88,12 +88,14 @@ func ExpandUser(path string) (exPath string, err error) {
 // 1. User config (~/.config/podhub/canary/config.yaml)
 // 2. System config (/etc/podhub/canary/config.yaml)
 func (c ConfigNamespace) Path() (path string, err error) {
-	if _, err := os.Stat(c.systemPath()); err == nil {
-		path = c.systemPath()
+	systemPath, _ := c.systemPath()
+	if _, err := os.Stat(systemPath); err == nil {
+		path, _ = c.systemPath()
 	}
 
-	if _, err := os.Stat(c.userPath()); err == nil {
-		path = c.userPath()
+	userPath, _ := c.userPath()
+	if _, err := os.Stat(userPath); err == nil {
+		path, _ = c.userPath()
 	}
 	return
 }
