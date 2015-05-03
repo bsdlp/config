@@ -91,3 +91,13 @@ func (c ConfigNamespace) Path() (path string, err error) {
 	path = filepath.Join(userBase, c.Organization, c.Namespace, "config.yaml")
 	return
 }
+
+func (c ConfigNamespace) Load(dst interface{}) (err error) {
+	cfgPath, err := c.Path()
+	if err != nil {
+		return
+	}
+
+	err = Load(cfgPath, dst)
+	return
+}
