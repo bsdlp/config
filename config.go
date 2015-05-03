@@ -49,7 +49,7 @@ func Load(src string, dst interface{}) (err error) {
 		return
 	}
 
-	err = yaml.Unmarshal(data, &dst)
+	err = yaml.Unmarshal(data, dst)
 	return
 }
 
