@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"os/user"
 	"path/filepath"
 	"reflect"
@@ -22,6 +23,7 @@ type Config interface {
 }
 
 const UserBase string = "~/.config/"
+const EtcDir string = "/etc/"
 
 // Load expands the provided src path using config.ExpandUser, then reads
 // the file and unmarshals into dst using go-yaml.
@@ -82,7 +84,26 @@ func ExpandUser(path string) (exPath string, err error) {
 	return
 }
 
+// Returns path to config, chosen by hierarchy and checked for existence:
+// 1. User config (~/.config/podhub/canary/config.yaml)
+// 2. System config (/etc/podhub/canary/config.yaml)
 func (c ConfigNamespace) Path() (path string, err error) {
+	if _, err := os.Stat(c.systemPath()); err == nil {
+		path = c.systemPath()
+	}
+
+	if _, err := os.Stat(c.userPath()); err == nil {
+		path = c.userPath()
+	}
+	return
+}
+
+func (c ConfigNamespace) systemPath() (path string, err error) {
+	path = filepath.Join(EtcDir, c.Organization, c.Namespace, "config.yaml")
+	return
+}
+
+func (c ConfigNamespace) userPath() (path string, err error) {
 	userBase, err := ExpandUser(UserBase)
 	if err != nil {
 		return "", err
