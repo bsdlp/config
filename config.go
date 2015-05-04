@@ -63,8 +63,12 @@ func ExpandUser(path string) (exPath string, err error) {
 
 	dir := fmt.Sprintf("%s/", usr.HomeDir)
 
-	exPath = strings.Replace(path, "~/", dir, 1)
-	exPath = strings.Replace(exPath, "$HOME", dir, 1)
+	exPath = path
+	if len(path) > 2 && path[:2] == "~/" {
+		exPath = strings.Replace(exPath, "~/", dir, 1)
+	} else if len(path) > 5 && path[:5] == "$HOME" {
+		exPath = strings.Replace(exPath, "$HOME", dir, 1)
+	}
 
 	if err != nil {
 		return "", err
