@@ -110,7 +110,7 @@ func (c Namespace) Path() (path string, err error) {
 }
 
 func (c Namespace) systemPath() (path string, err error) {
-	path = filepath.Join(SystemBase, c.Organization, c.Project, "config.yaml")
+	path = filepath.Join(SystemBase, c.Organization, c.System, "config.yaml")
 	return
 }
 
@@ -120,7 +120,7 @@ func (c Namespace) userPath() (path string, err error) {
 		return "", err
 	}
 
-	path = filepath.Join(userBase, c.Organization, c.Project, "config.yaml")
+	path = filepath.Join(userBase, c.Organization, c.System, "config.yaml")
 	return
 }
 
