@@ -13,7 +13,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// config.ConfigNamespace holds the pieces joined together to form the
+// ConfigNamespace holds the pieces joined together to form the
 // directory namespacing for config.
 type ConfigNamespace struct {
 	Organization string // optional additional namespace for orgs.
@@ -38,9 +38,9 @@ func Load(src string, dst interface{}) (err error) {
 	dstv := reflect.ValueOf(dst)
 
 	if dstv.Kind() != reflect.Ptr {
-		err = errors.New("config: not a pointer.")
+		err = errors.New("config: not a pointer")
 	} else if dstv.IsNil() {
-		err = fmt.Errorf("nil %s.", reflect.TypeOf(dstv).String())
+		err = fmt.Errorf("nil %s", reflect.TypeOf(dstv).String())
 	}
 	if err != nil {
 		return
@@ -60,8 +60,8 @@ func Load(src string, dst interface{}) (err error) {
 	return
 }
 
-// Acts kind of like os.path.expanduser in Python, except only supports
-// expanding "~/" or "$HOME"
+// ExpandUser acts kind of like os.path.expanduser in Python, except only
+// supports expanding "~/" or "$HOME"
 func ExpandUser(path string) (exPath string, err error) {
 	usr, err := user.Current()
 	if err != nil {
@@ -90,7 +90,8 @@ func ExpandUser(path string) (exPath string, err error) {
 	return
 }
 
-// Returns path to config, chosen by hierarchy and checked for existence:
+// Path() returns path to config, chosen by hierarchy and checked for
+// existence:
 //
 // 1. User config (~/.config/podhub/canary/config.yaml)
 //
@@ -123,8 +124,8 @@ func (c ConfigNamespace) userPath() (path string, err error) {
 	return
 }
 
-// Convenience function registered to config.ConfigNamespace to implement
-// Config.Load().
+// Load() is a convenience function registered to config.ConfigNamespace to
+// implement Config.Load().
 func (c ConfigNamespace) Load(dst interface{}) (err error) {
 	cfgPath, err := c.Path()
 	if err != nil {
