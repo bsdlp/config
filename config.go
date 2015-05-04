@@ -13,11 +13,11 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// ConfigNamespace holds the pieces joined together to form the
+// Namespace holds the pieces joined together to form the
 // directory namespacing for config.
-type ConfigNamespace struct {
+type Namespace struct {
 	Organization string // optional additional namespace for orgs.
-	Namespace    string // usually project name.
+	System       string // Name of the system associated with this config.
 }
 
 // The Config interface implements config.
@@ -96,7 +96,7 @@ func ExpandUser(path string) (exPath string, err error) {
 // 1. User config (~/.config/podhub/canary/config.yaml)
 //
 // 2. System config (/etc/podhub/canary/config.yaml)
-func (c ConfigNamespace) Path() (path string, err error) {
+func (c Namespace) Path() (path string, err error) {
 	systemPath, _ := c.systemPath()
 	if _, err := os.Stat(systemPath); err == nil {
 		path, _ = c.systemPath()
@@ -109,24 +109,24 @@ func (c ConfigNamespace) Path() (path string, err error) {
 	return
 }
 
-func (c ConfigNamespace) systemPath() (path string, err error) {
-	path = filepath.Join(SystemBase, c.Organization, c.Namespace, "config.yaml")
+func (c Namespace) systemPath() (path string, err error) {
+	path = filepath.Join(SystemBase, c.Organization, c.Project, "config.yaml")
 	return
 }
 
-func (c ConfigNamespace) userPath() (path string, err error) {
+func (c Namespace) userPath() (path string, err error) {
 	userBase, err := ExpandUser(UserBase)
 	if err != nil {
 		return "", err
 	}
 
-	path = filepath.Join(userBase, c.Organization, c.Namespace, "config.yaml")
+	path = filepath.Join(userBase, c.Organization, c.Project, "config.yaml")
 	return
 }
 
-// Load is a convenience function registered to config.ConfigNamespace to
+// Load is a convenience function registered to config.Namespace to
 // implement Config.Load().
-func (c ConfigNamespace) Load(dst interface{}) (err error) {
+func (c Namespace) Load(dst interface{}) (err error) {
 	cfgPath, err := c.Path()
 	if err != nil {
 		return

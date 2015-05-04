@@ -15,10 +15,10 @@ import (
 //    - "a"
 //    - "b"
 //    - "c"
-func ExampleConfigNamespace() {
-	var cfgNS = config.ConfigNamespace{
+func ExampleNamespace() {
+	var cfgNS = config.Namespace{
 		Organization: "podhub",
-		Namespace:    "canary",
+		System:       "canary",
 	}
 
 	type Config struct {
