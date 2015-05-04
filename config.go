@@ -90,7 +90,7 @@ func ExpandUser(path string) (exPath string, err error) {
 	return
 }
 
-// Path() returns path to config, chosen by hierarchy and checked for
+// Path returns path to config, chosen by hierarchy and checked for
 // existence:
 //
 // 1. User config (~/.config/podhub/canary/config.yaml)
@@ -124,7 +124,7 @@ func (c ConfigNamespace) userPath() (path string, err error) {
 	return
 }
 
-// Load() is a convenience function registered to config.ConfigNamespace to
+// Load is a convenience function registered to config.ConfigNamespace to
 // implement Config.Load().
 func (c ConfigNamespace) Load(dst interface{}) (err error) {
 	cfgPath, err := c.Path()
