@@ -13,17 +13,24 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// config.ConfigNamespace holds the pieces joined together to form the
+// directory namespacing for config.
 type ConfigNamespace struct {
 	Organization string // optional additional namespace for orgs.
 	Namespace    string // usually project name.
 }
 
+// The Config interface implements config.
 type Config interface {
 	Load(src string, dst interface{}) error
 }
 
-const UserBase string = "~/.config/"
-const SystemBase string = "/etc/"
+// UserBase and SystemBase are the prefixes for the user and system config
+// paths, respectively.
+const (
+	UserBase   string = "~/.config/"
+	SystemBase string = "/etc/"
+)
 
 // Load expands the provided src path using config.ExpandUser, then reads
 // the file and unmarshals into dst using go-yaml.
@@ -53,9 +60,9 @@ func Load(src string, dst interface{}) (err error) {
 	return
 }
 
+// Acts kind of like os.path.expanduser in Python, except only supports
+// expanding "~/" or "$HOME"
 func ExpandUser(path string) (exPath string, err error) {
-	// Acts kind of like os.path.expanduser in Python, except only supports
-	// expanding "~/" or "$HOME"
 	usr, err := user.Current()
 	if err != nil {
 		return
@@ -116,6 +123,8 @@ func (c ConfigNamespace) userPath() (path string, err error) {
 	return
 }
 
+// Convenience function registered to config.ConfigNamespace to implement
+// Config.Load().
 func (c ConfigNamespace) Load(dst interface{}) (err error) {
 	cfgPath, err := c.Path()
 	if err != nil {
