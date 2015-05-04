@@ -23,7 +23,7 @@ type Config interface {
 }
 
 const UserBase string = "~/.config/"
-const EtcDir string = "/etc/"
+const SystemBase string = "/etc/"
 
 // Load expands the provided src path using config.ExpandUser, then reads
 // the file and unmarshals into dst using go-yaml.
@@ -100,7 +100,7 @@ func (c ConfigNamespace) Path() (path string, err error) {
 }
 
 func (c ConfigNamespace) systemPath() (path string, err error) {
-	path = filepath.Join(EtcDir, c.Organization, c.Namespace, "config.yaml")
+	path = filepath.Join(SystemBase, c.Organization, c.Namespace, "config.yaml")
 	return
 }
 
