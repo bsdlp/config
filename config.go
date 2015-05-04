@@ -84,7 +84,9 @@ func ExpandUser(path string) (exPath string, err error) {
 }
 
 // Returns path to config, chosen by hierarchy and checked for existence:
+//
 // 1. User config (~/.config/podhub/canary/config.yaml)
+//
 // 2. System config (/etc/podhub/canary/config.yaml)
 func (c ConfigNamespace) Path() (path string, err error) {
 	systemPath, _ := c.systemPath()
