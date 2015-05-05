@@ -2,6 +2,7 @@ package config_test
 
 import (
 	"fmt"
+	"testing"
 
 	"github.com/fly/config"
 )
@@ -34,4 +35,20 @@ func ExampleNamespace() {
 	fmt.Println("Contents of cfg " + fmt.Sprint(cfg))
 	// Output: Path to config: /Users/jchen/.config/podhub/canary/config.yaml
 	// Output: Contents of cfg: {[a b c]}
+}
+
+func TestExpandUser(t *testing.T) {
+	var path string
+	correctPath := "/home/travis/.config/fly/config/config.yaml"
+	path, err := config.ExpandUser("~/.config/fly/config/config.yaml")
+
+	if err != nil {
+		t.Error("Got an error: ", err, ", expecting nil")
+	}
+
+	// docs say not to trust /home/travis to be homedir. We'll need to
+	// revisit this later.
+	if path != correctPath {
+		t.Error("Expected ", correctPath, ", got ", path)
+	}
 }
