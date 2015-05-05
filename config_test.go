@@ -72,6 +72,26 @@ func TestLoad(t *testing.T) {
 	}
 
 	if cfg != correctCfg {
-		t.Error("Got ", cfg, ", expecting ", correctCfg)
+		t.Error("Expecting ", correctCfg, ", got ", cfg)
+	}
+}
+
+func TestUserBase(t *testing.T) {
+	var userBase string
+	var correctUserBase = "~/.config/"
+	userBase = config.UserBase
+
+	if userBase != correctUserBase {
+		t.Error("Expecting ", correctUserBase, ", got ", userBase)
+	}
+}
+
+func TestSystemBase(t *testing.T) {
+	var systemBase string
+	var correctSystemBase = "~/.config/"
+	systemBase = config.SystemBase
+
+	if systemBase != correctSystemBase {
+		t.Error("Expecting ", correctSystemBase, ", got ", systemBase)
 	}
 }
