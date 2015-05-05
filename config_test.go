@@ -44,7 +44,6 @@ func ExampleNamespace() {
 
 func TestExpandUser(t *testing.T) {
 	var homeDir string
-	var correctPath = homeDir + "/.config/fly/config/config.yaml"
 	var err error
 	var path string
 
@@ -53,6 +52,7 @@ func TestExpandUser(t *testing.T) {
 	} else {
 		homeDir = os.Getenv("HOME")
 	}
+	var correctPath = homeDir + "/.config/fly/config/config.yaml"
 
 	path, err = config.ExpandUser("~/.config/fly/config/config.yaml")
 
@@ -69,7 +69,6 @@ func TestExpandUser(t *testing.T) {
 
 func TestLoad(t *testing.T) {
 	const correctDir = "/etc/fly/config/"
-	const correctPath = correctDir + "config.yaml"
 	type configExample struct {
 		Location string `yaml:"location"`
 		Burritos bool   `yaml:"burritos"`
@@ -92,6 +91,7 @@ burritos: true`
 	} else {
 		homeDir = os.Getenv("HOME")
 	}
+	const correctPath = correctDir + "config.yaml"
 
 	// Setup
 	os.RemoveAll(homeDir + "/.config/fly/config/config.yaml")
@@ -141,7 +141,6 @@ func TestSystemBase(t *testing.T) {
 
 func TestNamespacePath(t *testing.T) {
 	const correctDir = "/etc/fly/config/"
-	const correctPath = correctDir + "config.yaml"
 	var cfgNS = config.Namespace{
 		Organization: "fly",
 		System:       "config",
@@ -155,6 +154,7 @@ func TestNamespacePath(t *testing.T) {
 	} else {
 		homeDir = os.Getenv("HOME")
 	}
+	const correctPath = correctDir + "config.yaml"
 
 	// Setup
 	os.RemoveAll(homeDir + "/.config/fly/config/config.yaml")
@@ -183,7 +183,6 @@ func TestNamespacePath(t *testing.T) {
 
 func TestNamespaceLoad(t *testing.T) {
 	const correctDir = "/etc/fly/config/"
-	const correctPath = correctDir + "config.yaml"
 	type configExample struct {
 		Location string
 		Burritos bool
@@ -210,6 +209,7 @@ burritos: true`
 	} else {
 		homeDir = os.Getenv("HOME")
 	}
+	const correctPath = correctDir + "config.yaml"
 
 	// Setup
 	os.RemoveAll(homeDir + "/.config/fly/config/config.yaml")
