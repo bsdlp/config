@@ -89,11 +89,48 @@ func TestUserBase(t *testing.T) {
 }
 
 func TestSystemBase(t *testing.T) {
+	const correctSystemBase = "~/.config/"
 	var systemBase string
-	var correctSystemBase = "~/.config/"
 	systemBase = config.SystemBase
 
 	if systemBase != correctSystemBase {
 		t.Error("Expecting ", correctSystemBase, ", got ", systemBase)
+	}
+}
+
+func TestNamespacePath(t *testing.T) {
+	const correctDir = "/etc/fly/config/"
+	const correctPath = correctDir + "testconfig.yaml"
+	var cfgNS = config.Namespace{
+		Organization: "fly",
+		System:       "config",
+	}
+	var err error
+	var path string
+	var dirMode os.FileMode = 0755
+	var fileMode os.FileMode = 0644
+
+	// Setup
+	os.RemoveAll("/home/travis/.config/fly/config/testconfig.yaml")
+	os.MkdirAll(correctDir, dirMode)
+	_, err = os.Create(correctPath)
+	if err != nil {
+		t.Error("Unable to create file ", correctPath, ", got an error: ", err)
+	}
+
+	// Test
+	path, err = cfgNS.Path()
+	if err != nil {
+		t.Error("Got an error: ", err, " expecting nil")
+	}
+	if path != correctPath {
+		t.Error("Expecting ", correctPath, ", got ", path)
+	}
+
+	// Teardown
+	err = os.RemoveAll(correctPath)
+	if err != nil {
+		t.Error("Unable to remove file ", correctPath,
+			" in teardown, got an error: ", err)
 	}
 }
