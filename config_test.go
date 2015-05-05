@@ -52,3 +52,26 @@ func TestExpandUser(t *testing.T) {
 		t.Error("Expected ", correctPath, ", got ", path)
 	}
 }
+
+func TestLoad(t *testing.T) {
+	type configExample struct {
+		Location string
+		Burritos bool
+	}
+
+	var err error
+	var cfg configExample
+	var correctCfg = configExample{
+		Location: "Señor Sisig",
+		Burritos: true,
+	}
+
+	err = config.Load("/home/travis/.config/fly/config/config.yaml", &cfg)
+	if err != nil {
+		t.Error("Got an error: ", err, ", expecting nil")
+	}
+
+	if cfg != correctCfg {
+		t.Error("Got ", cfg, ", expecting ", correctCfg)
+	}
+}
