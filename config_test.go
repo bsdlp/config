@@ -119,7 +119,7 @@ func TestUserBase(t *testing.T) {
 }
 
 func TestSystemBase(t *testing.T) {
-	const correctSystemBase = "~/.config/"
+	const correctSystemBase = "/etc/"
 	var systemBase string
 	systemBase = config.SystemBase
 
