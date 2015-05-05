@@ -1,0 +1,5 @@
+language: go
+go:
+  - tip
+install:
+  - go get gopkg.in/yaml.v2
