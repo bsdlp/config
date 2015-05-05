@@ -2,8 +2,8 @@ language: go
 go:
   - tip
 before_script:
-  - sudo mkdir -p /etc/fly/config/
-  - mkdir -p /home/travis/.config/fly/config
+  - sudo mkdir -p /etc/fly/config/ && sudo chown -R $USER /etc/fly/config/
+  - mkdir -p /home/travis/.config/fly/config && sudo chown -R $USER /home/travis/.config/fly/config
 install:
   - go get gopkg.in/yaml.v2
 sudo: required
