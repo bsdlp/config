@@ -70,10 +70,8 @@ func TestLoad(t *testing.T) {
 		Burritos bool   `yaml:"burritos"`
 	}
 
-	var correctCfgText = `
-location: Señor Sisig
-burritos: true
-	`
+	var correctCfgText = `location: Señor Sisig
+burritos: true`
 	var correctCfg = configExample{
 		Location: "Señor Sisig",
 		Burritos: true,
@@ -175,10 +173,8 @@ func TestNamespaceLoad(t *testing.T) {
 		Burritos bool
 	}
 
-	var correctCfgText = `
-location: Señor Sisig
-burritos: true
-	`
+	var correctCfgText = `location: Señor Sisig
+burritos: true`
 	var correctCfg = configExample{
 		Location: "Señor Sisig",
 		Burritos: true,
