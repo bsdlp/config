@@ -1,3 +1,4 @@
+// Package config version v1.0.0
 package config
 
 import (
