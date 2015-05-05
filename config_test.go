@@ -44,10 +44,10 @@ func ExampleNamespace() {
 
 func TestExpandUser(t *testing.T) {
 	var homeDir = os.Getenv("HOME")
-	var correctPath = homeDir + "/.config/fly/config/testconfig.yaml"
+	var correctPath = homeDir + "/.config/fly/config/config.yaml"
 	var err error
 	var path string
-	path, err = config.ExpandUser("~/.config/fly/config/testconfig.yaml")
+	path, err = config.ExpandUser("~/.config/fly/config/config.yaml")
 
 	if err != nil {
 		t.Error("Got an error: ", err, ", expecting nil")
@@ -62,7 +62,7 @@ func TestExpandUser(t *testing.T) {
 
 func TestLoad(t *testing.T) {
 	const correctDir = "/etc/fly/config/"
-	const correctPath = correctDir + "testconfig.yaml"
+	const correctPath = correctDir + "config.yaml"
 	type configExample struct {
 		Location string `yaml:"location"`
 		Burritos bool   `yaml:"burritos"`
@@ -81,7 +81,7 @@ burritos: true`
 	var fileMode os.FileMode = 0644
 
 	// Setup
-	os.RemoveAll(homeDir + "/.config/fly/config/testconfig.yaml")
+	os.RemoveAll(homeDir + "/.config/fly/config/config.yaml")
 	os.MkdirAll(correctDir, dirMode)
 	err = ioutil.WriteFile(correctPath, []byte(correctCfgText), fileMode)
 	if err != nil {
@@ -128,7 +128,7 @@ func TestSystemBase(t *testing.T) {
 
 func TestNamespacePath(t *testing.T) {
 	const correctDir = "/etc/fly/config/"
-	const correctPath = correctDir + "testconfig.yaml"
+	const correctPath = correctDir + "config.yaml"
 	var cfgNS = config.Namespace{
 		Organization: "fly",
 		System:       "config",
@@ -139,7 +139,7 @@ func TestNamespacePath(t *testing.T) {
 	var dirMode os.FileMode = 0755
 
 	// Setup
-	os.RemoveAll(homeDir + "/.config/fly/config/testconfig.yaml")
+	os.RemoveAll(homeDir + "/.config/fly/config/config.yaml")
 	os.MkdirAll(correctDir, dirMode)
 	_, err = os.Create(correctPath)
 	if err != nil {
@@ -165,7 +165,7 @@ func TestNamespacePath(t *testing.T) {
 
 func TestNamespaceLoad(t *testing.T) {
 	const correctDir = "/etc/fly/config/"
-	const correctPath = correctDir + "testconfig.yaml"
+	const correctPath = correctDir + "config.yaml"
 	type configExample struct {
 		Location string
 		Burritos bool
@@ -188,7 +188,7 @@ burritos: true`
 	var fileMode os.FileMode = 0644
 
 	// Setup
-	os.RemoveAll(homeDir + "/.config/fly/config/testconfig.yaml")
+	os.RemoveAll(homeDir + "/.config/fly/config/config.yaml")
 	os.MkdirAll(correctDir, dirMode)
 	err = ioutil.WriteFile(correctPath, []byte(correctCfgText), fileMode)
 	if err != nil {
