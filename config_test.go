@@ -49,7 +49,7 @@ func TestExpandUser(t *testing.T) {
 	var path string
 
 	if os.Getenv("TRAVIS") == "true" {
-		homeDIr = "/home/travis"
+		homeDir = "/home/travis"
 	} else {
 		homeDir = os.Getenv("HOME")
 	}
@@ -88,7 +88,7 @@ burritos: true`
 	var fileMode os.FileMode = 0644
 
 	if os.Getenv("TRAVIS") == "true" {
-		homeDIr = "/home/travis"
+		homeDir = "/home/travis"
 	} else {
 		homeDir = os.Getenv("HOME")
 	}
@@ -151,7 +151,7 @@ func TestNamespacePath(t *testing.T) {
 	var homeDir string
 	var dirMode os.FileMode = 0755
 	if os.Getenv("TRAVIS") == "true" {
-		homeDIr = "/home/travis"
+		homeDir = "/home/travis"
 	} else {
 		homeDir = os.Getenv("HOME")
 	}
@@ -206,7 +206,7 @@ burritos: true`
 	var fileMode os.FileMode = 0644
 
 	if os.Getenv("TRAVIS") == "true" {
-		homeDIr = "/home/travis"
+		homeDir = "/home/travis"
 	} else {
 		homeDir = os.Getenv("HOME")
 	}
