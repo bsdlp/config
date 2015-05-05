@@ -2,6 +2,7 @@ package config_test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/fly/config"
@@ -17,30 +18,31 @@ import (
 //    - "b"
 //    - "c"
 func ExampleNamespace() {
+	type Config struct {
+		Example []string `yaml:"example"`
+	}
+
+	var err error
+	var cfg Config
 	var cfgNS = config.Namespace{
 		Organization: "podhub",
 		System:       "canary",
 	}
 
-	type Config struct {
-		Example []string `yaml:"example"`
-	}
-
-	var cfg Config
-
-	path, err := cfgNS.Path()
+	path, _ = cfgNS.Path()
 	fmt.Println("Path to config " + path)
 
-	err := cfgNS.Load(&cfg)
+	err = cfgNS.Load(&cfg)
 	fmt.Println("Contents of cfg " + fmt.Sprint(cfg))
 	// Output: Path to config: /Users/jchen/.config/podhub/canary/config.yaml
 	// Output: Contents of cfg: {[a b c]}
 }
 
 func TestExpandUser(t *testing.T) {
+	const correctPath = "/home/travis/.config/fly/config/testconfig.yaml"
+	var err error
 	var path string
-	correctPath := "/home/travis/.config/fly/config/config.yaml"
-	path, err := config.ExpandUser("~/.config/fly/config/config.yaml")
+	path, err = config.ExpandUser("~/.config/fly/config/testconfig.yaml")
 
 	if err != nil {
 		t.Error("Got an error: ", err, ", expecting nil")
@@ -59,14 +61,14 @@ func TestLoad(t *testing.T) {
 		Burritos bool
 	}
 
-	var err error
-	var cfg configExample
 	var correctCfg = configExample{
 		Location: "Señor Sisig",
 		Burritos: true,
 	}
+	var err error
+	var cfg configExample
 
-	err = config.Load("/home/travis/.config/fly/config/config.yaml", &cfg)
+	err = config.Load("/home/travis/.config/fly/config/testconfig.yaml", &cfg)
 	if err != nil {
 		t.Error("Got an error: ", err, ", expecting nil")
 	}
@@ -77,8 +79,8 @@ func TestLoad(t *testing.T) {
 }
 
 func TestUserBase(t *testing.T) {
+	const correctUserBase = "~/.config/"
 	var userBase string
-	var correctUserBase = "~/.config/"
 	userBase = config.UserBase
 
 	if userBase != correctUserBase {
