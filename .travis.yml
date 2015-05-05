@@ -1,5 +1,9 @@
 language: go
 go:
   - tip
+before_script:
+  - sudo mkdir /etc/fly/config/
+  - mkdir /tmp/config/
 install:
   - go get gopkg.in/yaml.v2
+sudo: required
