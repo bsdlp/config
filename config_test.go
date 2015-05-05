@@ -46,7 +46,7 @@ func ExampleNamespace() {
 
 func TestExpandUser(t *testing.T) {
 	var homeDir = os.Getenv("HOME")
-	var correctPath = homeDir + ".config/fly/config/testconfig.yaml"
+	var correctPath = homeDir + "/.config/fly/config/testconfig.yaml"
 	var err error
 	var path string
 	path, err = config.ExpandUser("~/.config/fly/config/testconfig.yaml")
@@ -85,7 +85,7 @@ burritos: true
 	var fileMode os.FileMode = 0644
 
 	// Setup
-	os.RemoveAll(homeDir + ".config/fly/config/testconfig.yaml")
+	os.RemoveAll(homeDir + "/.config/fly/config/testconfig.yaml")
 	os.MkdirAll(correctDir, dirMode)
 	err = ioutil.WriteFile(correctPath, []byte(correctCfgText), fileMode)
 	if err != nil {
@@ -143,7 +143,7 @@ func TestNamespacePath(t *testing.T) {
 	var dirMode os.FileMode = 0755
 
 	// Setup
-	os.RemoveAll(homeDir + ".config/fly/config/testconfig.yaml")
+	os.RemoveAll(homeDir + "/.config/fly/config/testconfig.yaml")
 	os.MkdirAll(correctDir, dirMode)
 	_, err = os.Create(correctPath)
 	if err != nil {
@@ -194,7 +194,7 @@ burritos: true
 	var fileMode os.FileMode = 0644
 
 	// Setup
-	os.RemoveAll(homeDir + ".config/fly/config/testconfig.yaml")
+	os.RemoveAll(homeDir + "/.config/fly/config/testconfig.yaml")
 	os.MkdirAll(correctDir, dirMode)
 	err = ioutil.WriteFile(correctPath, []byte(correctCfgText), fileMode)
 	if err != nil {
