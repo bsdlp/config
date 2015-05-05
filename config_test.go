@@ -3,6 +3,7 @@ package config_test
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"testing"
 
@@ -25,6 +26,7 @@ func ExampleNamespace() {
 
 	var err error
 	var cfg Config
+	var path string
 	var cfgNS = config.Namespace{
 		Organization: "podhub",
 		System:       "canary",
@@ -34,6 +36,9 @@ func ExampleNamespace() {
 	fmt.Println("Path to config " + path)
 
 	err = cfgNS.Load(&cfg)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	fmt.Println("Contents of cfg " + fmt.Sprint(cfg))
 	// Output: Path to config: /Users/jchen/.config/podhub/canary/config.yaml
 	// Output: Contents of cfg: {[a b c]}
@@ -64,7 +69,7 @@ func TestLoad(t *testing.T) {
 		Burritos bool   `yaml:"burritos"`
 	}
 
-	correctCfgText = `
+	var correctCfgText = `
 location: Señor Sisig
 burritos: true
 	`
@@ -72,12 +77,7 @@ burritos: true
 		Location: "Señor Sisig",
 		Burritos: true,
 	}
-	var cfgNS = config.Namespace{
-		Organization: "fly",
-		System:       "config",
-	}
 	var err error
-	var path string
 	var cfg configExample
 	var dirMode os.FileMode = 0755
 	var fileMode os.FileMode = 0644
@@ -85,7 +85,7 @@ burritos: true
 	// Setup
 	os.RemoveAll("/home/travis/.config/fly/config/testconfig.yaml")
 	os.MkdirAll(correctDir, dirMode)
-	err = ioutil.WriteFile(correctPath, []byte(correctCfgText), 0644)
+	err = ioutil.WriteFile(correctPath, []byte(correctCfgText), fileMode)
 	if err != nil {
 		t.Error("Got an error writing ", correctPath, ", got an error: ", err)
 	}
@@ -138,7 +138,6 @@ func TestNamespacePath(t *testing.T) {
 	var err error
 	var path string
 	var dirMode os.FileMode = 0755
-	var fileMode os.FileMode = 0644
 
 	// Setup
 	os.RemoveAll("/home/travis/.config/fly/config/testconfig.yaml")
@@ -173,7 +172,7 @@ func TestNamespaceLoad(t *testing.T) {
 		Burritos bool
 	}
 
-	correctCfgText = `
+	var correctCfgText = `
 location: Señor Sisig
 burritos: true
 	`
@@ -186,7 +185,6 @@ burritos: true
 		System:       "config",
 	}
 	var err error
-	var path string
 	var cfg configExample
 	var dirMode os.FileMode = 0755
 	var fileMode os.FileMode = 0644
@@ -194,7 +192,7 @@ burritos: true
 	// Setup
 	os.RemoveAll("/home/travis/.config/fly/config/testconfig.yaml")
 	os.MkdirAll(correctDir, dirMode)
-	err = ioutil.WriteFile(correctPath, []byte(correctCfgText), 0644)
+	err = ioutil.WriteFile(correctPath, []byte(correctCfgText), fileMode)
 	if err != nil {
 		t.Error("Got an error writing ", correctPath, ", got an error: ", err)
 	}
