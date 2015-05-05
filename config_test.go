@@ -2,6 +2,7 @@ package config_test
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"testing"
 
@@ -56,25 +57,54 @@ func TestExpandUser(t *testing.T) {
 }
 
 func TestLoad(t *testing.T) {
+	const correctDir = "/etc/fly/config/"
+	const correctPath = correctDir + "testconfig.yaml"
 	type configExample struct {
-		Location string
-		Burritos bool
+		Location string `yaml:"location"`
+		Burritos bool   `yaml:"burritos"`
 	}
 
+	correctCfgText = `
+location: Señor Sisig
+burritos: true
+	`
 	var correctCfg = configExample{
 		Location: "Señor Sisig",
 		Burritos: true,
 	}
+	var cfgNS = config.Namespace{
+		Organization: "fly",
+		System:       "config",
+	}
 	var err error
+	var path string
 	var cfg configExample
+	var dirMode os.FileMode = 0755
+	var fileMode os.FileMode = 0644
 
-	err = config.Load("/home/travis/.config/fly/config/testconfig.yaml", &cfg)
+	// Setup
+	os.RemoveAll("/home/travis/.config/fly/config/testconfig.yaml")
+	os.MkdirAll(correctDir, dirMode)
+	err = ioutil.WriteFile(correctPath, []byte(correctCfgText), 0644)
+	if err != nil {
+		t.Error("Got an error writing ", correctPath, ", got an error: ", err)
+	}
+
+	// Test
+	err = config.Load(correctPath, &cfg)
 	if err != nil {
 		t.Error("Got an error: ", err, ", expecting nil")
 	}
 
 	if cfg != correctCfg {
 		t.Error("Expecting ", correctCfg, ", got ", cfg)
+	}
+
+	// Teardown
+	err = os.RemoveAll(correctPath)
+	if err != nil {
+		t.Error("Unable to remove file ", correctPath,
+			" in teardown, got an error: ", err)
 	}
 }
 
@@ -125,6 +155,58 @@ func TestNamespacePath(t *testing.T) {
 	}
 	if path != correctPath {
 		t.Error("Expecting ", correctPath, ", got ", path)
+	}
+
+	// Teardown
+	err = os.RemoveAll(correctPath)
+	if err != nil {
+		t.Error("Unable to remove file ", correctPath,
+			" in teardown, got an error: ", err)
+	}
+}
+
+func TestNamespaceLoad(t *testing.T) {
+	const correctDir = "/etc/fly/config/"
+	const correctPath = correctDir + "testconfig.yaml"
+	type configExample struct {
+		Location string
+		Burritos bool
+	}
+
+	correctCfgText = `
+location: Señor Sisig
+burritos: true
+	`
+	var correctCfg = configExample{
+		Location: "Señor Sisig",
+		Burritos: true,
+	}
+	var cfgNS = config.Namespace{
+		Organization: "fly",
+		System:       "config",
+	}
+	var err error
+	var path string
+	var cfg configExample
+	var dirMode os.FileMode = 0755
+	var fileMode os.FileMode = 0644
+
+	// Setup
+	os.RemoveAll("/home/travis/.config/fly/config/testconfig.yaml")
+	os.MkdirAll(correctDir, dirMode)
+	err = ioutil.WriteFile(correctPath, []byte(correctCfgText), 0644)
+	if err != nil {
+		t.Error("Got an error writing ", correctPath, ", got an error: ", err)
+	}
+
+	// Test
+	err = cfgNS.Load(&cfg)
+	if err != nil {
+		t.Error("Got an error: ", err, ", expecting nil")
+	}
+
+	if cfg != correctCfg {
+		t.Error("Expecting ", correctCfg, ", got ", cfg)
 	}
 
 	// Teardown
