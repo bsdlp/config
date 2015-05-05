@@ -40,8 +40,6 @@ func ExampleNamespace() {
 		log.Fatalln(err)
 	}
 	fmt.Println("Contents of cfg " + fmt.Sprint(cfg))
-	// Output: Path to config: /Users/jchen/.config/podhub/canary/config.yaml
-	// Output: Contents of cfg: {[a b c]}
 }
 
 func TestExpandUser(t *testing.T) {
