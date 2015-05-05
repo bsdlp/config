@@ -3,7 +3,7 @@ go:
   - tip
 before_script:
   - sudo mkdir -p /etc/fly/config/
-  - mkdir -p /tmp/config/
+  - mkdir -p /home/travis/.config/fly/config
 install:
   - go get gopkg.in/yaml.v2
 sudo: required

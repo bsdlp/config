@@ -43,10 +43,17 @@ func ExampleNamespace() {
 }
 
 func TestExpandUser(t *testing.T) {
-	var homeDir = os.Getenv("HOME")
+	var homeDir string
 	var correctPath = homeDir + "/.config/fly/config/config.yaml"
 	var err error
 	var path string
+
+	if os.Getenv("TRAVIS") == "true" {
+		homeDIr = "/home/travis"
+	} else {
+		homeDir = os.Getenv("HOME")
+	}
+
 	path, err = config.ExpandUser("~/.config/fly/config/config.yaml")
 
 	if err != nil {
@@ -76,9 +83,15 @@ burritos: true`
 	}
 	var err error
 	var cfg configExample
-	var homeDir = os.Getenv("HOME")
+	var homeDir string
 	var dirMode os.FileMode = 0755
 	var fileMode os.FileMode = 0644
+
+	if os.Getenv("TRAVIS") == "true" {
+		homeDIr = "/home/travis"
+	} else {
+		homeDir = os.Getenv("HOME")
+	}
 
 	// Setup
 	os.RemoveAll(homeDir + "/.config/fly/config/config.yaml")
@@ -135,8 +148,13 @@ func TestNamespacePath(t *testing.T) {
 	}
 	var err error
 	var path string
-	var homeDir = os.Getenv("HOME")
+	var homeDir string
 	var dirMode os.FileMode = 0755
+	if os.Getenv("TRAVIS") == "true" {
+		homeDIr = "/home/travis"
+	} else {
+		homeDir = os.Getenv("HOME")
+	}
 
 	// Setup
 	os.RemoveAll(homeDir + "/.config/fly/config/config.yaml")
@@ -183,9 +201,15 @@ burritos: true`
 	}
 	var err error
 	var cfg configExample
-	var homeDir = os.Getenv("HOME")
+	var homeDir string
 	var dirMode os.FileMode = 0755
 	var fileMode os.FileMode = 0644
+
+	if os.Getenv("TRAVIS") == "true" {
+		homeDIr = "/home/travis"
+	} else {
+		homeDir = os.Getenv("HOME")
+	}
 
 	// Setup
 	os.RemoveAll(homeDir + "/.config/fly/config/config.yaml")
