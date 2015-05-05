@@ -1,9 +1,15 @@
 language: go
+sudo: required
 go:
   - tip
+before_install:
+  - go get github.com/axw/gocov/gocov
+  - go get github.com/mattn/goveralls
+  - if ! go get code.google.com/p/go.tools/cmd/cover; then go get golang.org/x/tools/cmd/cover; fi
+install:
+  - go get gopkg.in/yaml.v2
 before_script:
   - sudo mkdir -p /etc/fly/config/ && sudo chown -R $USER /etc/fly/config/
   - mkdir -p /home/travis/.config/fly/config && sudo chown -R $USER /home/travis/.config/fly/config
-install:
-  - go get gopkg.in/yaml.v2
-sudo: required
+script:
+  - $HOME/gopath/bin/goveralls -service=travis-ci
