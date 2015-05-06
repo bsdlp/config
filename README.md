@@ -4,7 +4,7 @@
 [![Build Status](https://img.shields.io/travis/fly/config.svg?branch=master)](https://travis-ci.org/fly/config)
 [![Coveralls](https://img.shields.io/coveralls/fly/config/master.svg)](https://coveralls.io/r/fly/config)
 
-Configuration is hard.
+Configuration is hard, so I've made some decisions for you. YAML is used as the file format, although you can override the `Load()` method to get around this fact.
 
 ## Installation:
 
