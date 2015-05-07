@@ -76,10 +76,6 @@ func ExpandUser(path string) (exPath string, err error) {
 		exPath = strings.Replace(exPath, "$HOME", dir, 1)
 	}
 
-	if err != nil {
-		return "", err
-	}
-
 	exPath, err = filepath.Abs(filepath.Clean(exPath))
 
 	if err != nil {
