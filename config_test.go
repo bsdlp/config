@@ -116,6 +116,11 @@ burritos: true`
 		t.Error("Expecting error: config: not a pointer, instead got", err)
 	}
 
+	err = config.Load("rumpelstilzjchen", &cfg)
+	if err == nil {
+		t.Error("Expected read error, got nil")
+	}
+
 	// Teardown
 	err = os.RemoveAll(correctPath)
 	if err != nil {
