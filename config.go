@@ -40,8 +40,6 @@ func Load(src string, dst interface{}) (err error) {
 
 	if dstv.Kind() != reflect.Ptr {
 		err = errors.New("config: not a pointer")
-	} else if dstv.IsNil() {
-		err = fmt.Errorf("nil %s", reflect.TypeOf(dstv).String())
 	}
 	if err != nil {
 		return
