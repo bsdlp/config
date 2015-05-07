@@ -111,6 +111,11 @@ burritos: true`
 		t.Error("Expecting ", correctCfg, ", got ", cfg)
 	}
 
+	err = config.Load(correctPath, cfg)
+	if err.Error() != "config: not a pointer" {
+		t.Error("Expecting error: config: not a pointer, instead got", err)
+	}
+
 	// Teardown
 	err = os.RemoveAll(correctPath)
 	if err != nil {
