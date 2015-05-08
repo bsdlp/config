@@ -65,6 +65,17 @@ func TestExpandUser(t *testing.T) {
 	if path != correctPath {
 		t.Error("Expected ", correctPath, ", got ", path)
 	}
+
+	path, err = config.ExpandUser("$HOME/.config/fly/config/config.yaml")
+	if err != nil {
+		t.Error("Got an error: ", err, ", expecting nil")
+	}
+
+	// docs say not to trust /home/travis to be homedir. We'll need to
+	// revisit this later.
+	if path != correctPath {
+		t.Error("Expected ", correctPath, ", got ", path)
+	}
 }
 
 func TestLoad(t *testing.T) {
