@@ -32,7 +32,7 @@ func ExampleNamespace() {
 		System:       "canary",
 	}
 
-	path, _ = cfgNS.Path()
+	path = cfgNS.Path()
 	fmt.Println("Path to config " + path)
 
 	err = cfgNS.Load(&cfg)
@@ -186,10 +186,7 @@ func TestNamespacePath(t *testing.T) {
 	}
 
 	// Test
-	path, err = cfgNS.Path()
-	if err != nil {
-		t.Error("Got an error: ", err, " expecting nil")
-	}
+	path = cfgNS.Path()
 	if path != correctPath {
 		t.Error("Expecting ", correctPath, ", got ", path)
 	}
