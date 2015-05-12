@@ -91,7 +91,7 @@ func ExpandUser(path string) (exPath string, err error) {
 // 1. User config (~/.config/podhub/canary/config.yaml)
 //
 // 2. System config (/etc/podhub/canary/config.yaml)
-func (c Namespace) Path() (path string, err error) {
+func (c Namespace) Path() (path string) {
 	systemPath, _ := c.systemPath()
 	if _, err := os.Stat(systemPath); err == nil {
 		path, _ = c.systemPath()
@@ -122,10 +122,7 @@ func (c Namespace) userPath() (path string, err error) {
 // Load is a convenience function registered to config.Namespace to
 // implement Config.Load().
 func (c Namespace) Load(dst interface{}) (err error) {
-	cfgPath, err := c.Path()
-	if err != nil {
-		return
-	}
+	cfgPath := c.Path()
 
 	err = Load(cfgPath, dst)
 	return
