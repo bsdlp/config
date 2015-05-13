@@ -54,11 +54,7 @@ func TestExpandUser(t *testing.T) {
 	}
 	var correctPath = homeDir + "/.config/fly/config/config.yaml"
 
-	path, err = config.ExpandUser("~/.config/fly/config/config.yaml")
-
-	if err != nil {
-		t.Error("Got an error: ", err, ", expecting nil")
-	}
+	path = config.ExpandUser("~/.config/fly/config/config.yaml")
 
 	// docs say not to trust /home/travis to be homedir. We'll need to
 	// revisit this later.
@@ -66,10 +62,7 @@ func TestExpandUser(t *testing.T) {
 		t.Error("Expected ", correctPath, ", got ", path)
 	}
 
-	path, err = config.ExpandUser("$HOME/.config/fly/config/config.yaml")
-	if err != nil {
-		t.Error("Got an error: ", err, ", expecting nil")
-	}
+	path = config.ExpandUser("$HOME/.config/fly/config/config.yaml")
 
 	// docs say not to trust /home/travis to be homedir. We'll need to
 	// revisit this later.
