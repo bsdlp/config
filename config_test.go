@@ -44,7 +44,6 @@ func ExampleNamespace() {
 
 func TestExpandUser(t *testing.T) {
 	var homeDir string
-	var err error
 	var path string
 
 	if os.Getenv("TRAVIS") == "true" {

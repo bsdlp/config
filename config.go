@@ -76,7 +76,7 @@ func ExpandUser(path string) (exPath string) {
 	exPath, err = filepath.Abs(filepath.Clean(exPath))
 
 	if err != nil {
-		return "", err
+		return
 	}
 
 	return
