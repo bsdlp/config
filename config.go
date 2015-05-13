@@ -45,10 +45,7 @@ func Load(src string, dst interface{}) (err error) {
 		return
 	}
 
-	path, err := ExpandUser(src)
-	if err != nil {
-		return
-	}
+	path := ExpandUser(src)
 
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -61,7 +58,7 @@ func Load(src string, dst interface{}) (err error) {
 
 // ExpandUser acts kind of like os.path.expanduser in Python, except only
 // supports expanding "~/" or "$HOME"
-func ExpandUser(path string) (exPath string, err error) {
+func ExpandUser(path string) (exPath string) {
 	usr, err := user.Current()
 	if err != nil {
 		return
@@ -110,10 +107,7 @@ func (c Namespace) systemPath() (path string, err error) {
 }
 
 func (c Namespace) userPath() (path string, err error) {
-	userBase, err := ExpandUser(UserBase)
-	if err != nil {
-		return "", err
-	}
+	userBase := ExpandUser(UserBase)
 
 	path = filepath.Join(userBase, c.Organization, c.System, "config.yaml")
 	return
