@@ -59,10 +59,7 @@ func Load(src string, dst interface{}) (err error) {
 // ExpandUser acts kind of like os.path.expanduser in Python, except only
 // supports expanding "~/" or "$HOME"
 func ExpandUser(path string) (exPath string) {
-	usr, err := user.Current()
-	if err != nil {
-		return
-	}
+	usr, _ := user.Current()
 
 	dir := fmt.Sprintf("%s/", usr.HomeDir)
 
@@ -73,12 +70,7 @@ func ExpandUser(path string) (exPath string) {
 		exPath = strings.Replace(exPath, "$HOME", dir, 1)
 	}
 
-	exPath, err = filepath.Abs(filepath.Clean(exPath))
-
-	if err != nil {
-		return
-	}
-
+	exPath, _ = filepath.Abs(filepath.Clean(exPath))
 	return
 }
 
