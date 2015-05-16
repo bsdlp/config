@@ -189,6 +189,30 @@ func TestNamespacePath(t *testing.T) {
 		t.Error("Unable to remove file ", correctPath,
 			" in teardown, got an error: ", err)
 	}
+	
+	// test homedir
+	// Setup
+	correctDir = "/home/travis/.config/fly/config/"
+	correctPath = correctDir + "config.yaml"
+	os.RemoveAll("/etc/fly/config/")
+	os.MkdirAll(correctDir, dirMode)
+	_, err = os.Create(correctPath)
+	if err != nil {
+		t.Error("Unable to create file ", correctPath, ", got an error: ", err)
+	}
+	
+	// Test
+	path = cfgNS.Path()
+	if path != correctPath {
+		t.Error("Expecting ", correctPath, ", got ", path)
+	}
+	
+	// Teardown
+	err = os.RemoveAll(correctPath)
+	if err != nil {
+		t.Error("Unable to remove file ", correctPath,
+			" in teardown, got an error: ", err)
+	}
 }
 
 func TestNamespaceLoad(t *testing.T) {
