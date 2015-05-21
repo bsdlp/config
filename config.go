@@ -105,6 +105,15 @@ func (c Namespace) userPath() (path string, err error) {
 	return
 }
 
+// EnvVar returns the name of the environment variable containing the URI
+// of the config.
+// Example: PODHUB_UUIDD_CONFIG_URI
+func (c Namespace) EnvVar() (envvar string) {
+	s := []string{c.Organization, c.System, "CONFIG", "URI"}
+	envvar = strings.ToUpper(strings.Join(s, "_"))
+	return
+}
+
 // Load is a convenience function registered to config.Namespace to
 // implement Config.Load().
 func (c Namespace) Load(dst interface{}) (err error) {

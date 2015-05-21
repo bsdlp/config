@@ -153,7 +153,7 @@ func TestSystemBase(t *testing.T) {
 }
 
 func TestNamespacePath(t *testing.T) {
-	const correctDir = "/etc/fly/config/"
+	var correctDir = "/etc/fly/config/"
 	var cfgNS = config.Namespace{
 		Organization: "fly",
 		System:       "config",
@@ -167,7 +167,7 @@ func TestNamespacePath(t *testing.T) {
 	} else {
 		homeDir = os.Getenv("HOME")
 	}
-	const correctPath = correctDir + "config.yaml"
+	var correctPath = correctDir + "config.yaml"
 
 	// Setup
 	os.RemoveAll(homeDir + "/.config/fly/config/config.yaml")
@@ -189,7 +189,7 @@ func TestNamespacePath(t *testing.T) {
 		t.Error("Unable to remove file ", correctPath,
 			" in teardown, got an error: ", err)
 	}
-	
+
 	// test homedir
 	// Setup
 	correctDir = "/home/travis/.config/fly/config/"
@@ -200,18 +200,31 @@ func TestNamespacePath(t *testing.T) {
 	if err != nil {
 		t.Error("Unable to create file ", correctPath, ", got an error: ", err)
 	}
-	
+
 	// Test
 	path = cfgNS.Path()
 	if path != correctPath {
 		t.Error("Expecting ", correctPath, ", got ", path)
 	}
-	
+
 	// Teardown
 	err = os.RemoveAll(correctPath)
 	if err != nil {
 		t.Error("Unable to remove file ", correctPath,
 			" in teardown, got an error: ", err)
+	}
+}
+
+func TestNamespaceEnvVar(t *testing.T) {
+	var cfgNS = config.Namespace{
+		Organization: "fly",
+		System:       "config",
+	}
+	const correctEnvVar string = "FLY_CONFIG_CONFIG_URI"
+
+	envVarURI := cfgNS.EnvVar()
+	if envVarURI != correctEnvVar {
+		t.Error("Expecting ", correctEnvVar, ", got ", envVarURI)
 	}
 }
 
