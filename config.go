@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/http"
+	"net/url"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -33,23 +35,41 @@ const (
 	SystemBase string = "/etc/"
 )
 
-// Load expands the provided src path using config.ExpandUser, then reads
-// the file and unmarshals into dst using go-yaml.
+// Load reads the contents of the src URI and unmarshals into dst using
+// go-yaml.
 func Load(src string, dst interface{}) (err error) {
+	var data []byte
 	dstv := reflect.ValueOf(dst)
 
 	if dstv.Kind() != reflect.Ptr {
 		err = errors.New("config: not a pointer")
-	}
-	if err != nil {
 		return
 	}
 
-	path := ExpandUser(src)
-
-	data, err := ioutil.ReadFile(path)
+	uri, err := url.Parse(src)
 	if err != nil {
-		return
+		return err
+	}
+
+	switch {
+	case uri.Scheme == "file":
+		path := ExpandUser(uri.Path)
+		data, err = ioutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+	case uri.Scheme == "http" || uri.Scheme == "https":
+		resp, err := http.Get(uri.String())
+		if err != nil {
+			return err
+		}
+
+		data, err = ioutil.ReadAll(resp.Body)
+
+		resp.Body.Close()
+		if err != nil {
+			return err
+		}
 	}
 
 	err = yaml.Unmarshal(data, dst)
