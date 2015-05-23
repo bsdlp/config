@@ -52,7 +52,7 @@ func Load(src string, dst interface{}) (err error) {
 	}
 
 	switch {
-	case uri.Scheme == "file":
+	case uri.Scheme == "file" || uri.Scheme == "":
 		path := ExpandUser(uri.Path)
 		data, err = ioutil.ReadFile(path)
 		if err != nil {
