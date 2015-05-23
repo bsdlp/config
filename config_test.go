@@ -105,11 +105,6 @@ burritos: true`
 	}
 
 	// Test
-	err = config.Load("", &cfg)
-	if err == nil {
-		t.Error("Expecting empty url error, got nil")
-	}
-
 	err = config.Load(correctPath, &cfg)
 	if err != nil {
 		t.Error("Got an error: ", err, ", expecting nil")
