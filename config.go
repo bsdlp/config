@@ -113,15 +113,19 @@ func (c Namespace) Path() (path string) {
 	return
 }
 
-func (c Namespace) systemPath() (path string, err error) {
-	path = filepath.Join(SystemBase, c.Organization, c.System, "config.yaml")
+func (c Namespace) systemPath() (uri string, err error) {
+	path := filepath.Join(SystemBase, c.Organization, c.System, "config.yaml")
+	_uri := url.URL{Path: path, Scheme: "file"}
+	uri = _uri.String()
 	return
 }
 
-func (c Namespace) userPath() (path string, err error) {
+func (c Namespace) userPath() (uri string, err error) {
 	userBase := ExpandUser(UserBase)
 
-	path = filepath.Join(userBase, c.Organization, c.System, "config.yaml")
+	path := filepath.Join(userBase, c.Organization, c.System, "config.yaml")
+	_uri := url.URL{Path: path, Scheme: "file"}
+	uri = _uri.String()
 	return
 }
 
