@@ -101,31 +101,29 @@ func ExpandUser(path string) (exPath string) {
 //
 // 2. System config (/etc/podhub/canary/config.yaml)
 func (c Namespace) Path() (path string) {
-	systemPath, _ := c.systemPath()
+	systemPath := c.systemURI().Path
 	if _, err := os.Stat(systemPath); err == nil {
-		path, _ = systemPath
+		path = systemPath
 	}
 
-	userPath, _ := c.userPath()
+	userPath := c.systemURI().Path
 	if _, err := os.Stat(userPath); err == nil {
-		path, _ = userPath
+		path = userPath
 	}
 	return
 }
 
-func (c Namespace) systemPath() (uri string, err error) {
+func (c Namespace) systemURI() (uri url.URL) {
 	path := filepath.Join(SystemBase, c.Organization, c.System, "config.yaml")
-	_uri := url.URL{Path: path, Scheme: "file"}
-	uri = _uri.String()
+	uri = url.URL{Path: path, Scheme: "file"}
 	return
 }
 
-func (c Namespace) userPath() (uri string, err error) {
+func (c Namespace) userURI() (uri url.URL) {
 	userBase := ExpandUser(UserBase)
 
 	path := filepath.Join(userBase, c.Organization, c.System, "config.yaml")
-	_uri := url.URL{Path: path, Scheme: "file"}
-	uri = _uri.String()
+	uri = url.URL{Path: path, Scheme: "file"}
 	return
 }
 
