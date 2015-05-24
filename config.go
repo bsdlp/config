@@ -103,12 +103,12 @@ func ExpandUser(path string) (exPath string) {
 func (c Namespace) Path() (path string) {
 	systemPath, _ := c.systemPath()
 	if _, err := os.Stat(systemPath); err == nil {
-		path, _ = c.systemPath()
+		path, _ = systemPath
 	}
 
 	userPath, _ := c.userPath()
 	if _, err := os.Stat(userPath); err == nil {
-		path, _ = c.userPath()
+		path, _ = userPath
 	}
 	return
 }
