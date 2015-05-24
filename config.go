@@ -106,7 +106,7 @@ func (c Namespace) Path() (path string) {
 		path = systemPath
 	}
 
-	userPath := c.systemURI().Path
+	userPath := c.userURI().Path
 	if _, err := os.Stat(userPath); err == nil {
 		path = userPath
 	}
