@@ -97,11 +97,19 @@ burritos: true`
 	var cfg burritoConfig
 
 	// Setup
-	os.RemoveAll(userPath)
-	os.MkdirAll(correctDir, dirMode)
+	err = os.RemoveAll(userPath)
+	if err != nil {
+		t.Error("Got an error removing ", userPath, ": ", err)
+	}
+
+	err = os.MkdirAll(correctDir, dirMode)
+	if err != nil {
+		t.Error("Got an error creating ", correctDir, ": ", err)
+	}
+
 	err = ioutil.WriteFile(correctPath, []byte(correctCfgText), fileMode)
 	if err != nil {
-		t.Error("Got an error writing ", correctPath, ", got an error: ", err)
+		t.Error("Got an error writing ", correctPath, ": ", err)
 	}
 
 	// Test
@@ -153,8 +161,16 @@ func TestNamespacePath(t *testing.T) {
 	correctPath := systemPath
 
 	// Setup
-	os.RemoveAll(userPath)
-	os.MkdirAll(correctDir, dirMode)
+	err = os.RemoveAll(userPath)
+	if err != nil {
+		t.Error("Unable to remove file ", correctPath, ", got an error: ", err)
+	}
+
+	err = os.MkdirAll(correctDir, dirMode)
+	if err != nil {
+		t.Error("Unable to create directory ", correctPath, ", got an error: ", err)
+	}
+
 	_, err = os.Create(correctPath)
 	if err != nil {
 		t.Error("Unable to create file ", correctPath, ", got an error: ", err)
@@ -177,8 +193,16 @@ func TestNamespacePath(t *testing.T) {
 	// Setup
 	correctDir = userDir
 	correctPath = userPath
-	os.RemoveAll(systemDir)
-	os.MkdirAll(correctDir, dirMode)
+	err = os.RemoveAll(systemDir)
+	if err != nil {
+		t.Error("Unable to remove file ", correctPath, ", got an error: ", err)
+	}
+
+	err = os.MkdirAll(correctDir, dirMode)
+	if err != nil {
+		t.Error("Unable to create directory ", correctPath, ", got an error: ", err)
+	}
+
 	_, err = os.Create(correctPath)
 	if err != nil {
 		t.Error("Unable to create file ", correctPath, ", got an error: ", err)
@@ -218,11 +242,19 @@ burritos: true`
 	var cfg burritoConfig
 
 	// Setup
-	os.RemoveAll(userPath)
-	os.MkdirAll(correctDir, dirMode)
+	err = os.RemoveAll(userPath)
+	if err != nil {
+		t.Error("Unable to remove path ", correctPath, ", got an error: ", err)
+	}
+
+	err = os.MkdirAll(correctDir, dirMode)
+	if err != nil {
+		t.Error("Unable to create directory ", correctPath, ", got an error: ", err)
+	}
+
 	err = ioutil.WriteFile(correctPath, []byte(correctCfgText), fileMode)
 	if err != nil {
-		t.Error("Got an error writing ", correctPath, ", got an error: ", err)
+		t.Error("Got an error writing ", correctPath, ": ", err)
 	}
 
 	// Test
