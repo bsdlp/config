@@ -141,7 +141,7 @@ burritos: true`
 }
 
 func TestUserBase(t *testing.T) {
-	userbase := "~/.config"
+	userbase := "~/.config/"
 	if config.UserBase != userbase {
 		t.Error("Expecting ", userbase, ", got ", config.UserBase)
 	}
@@ -193,7 +193,7 @@ func TestNamespacePath(t *testing.T) {
 	// Setup
 	correctDir = userDir
 	correctPath = userPath
-	err = os.RemoveAll(systemDir)
+	err = os.RemoveAll(systemPath)
 	if err != nil {
 		t.Error("Unable to remove file ", correctPath, ", got an error: ", err)
 	}
