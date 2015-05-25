@@ -67,6 +67,7 @@ func ExampleNamespace() {
 }
 
 func TestExpandUser(t *testing.T) {
+	var path string
 	correctPath := userPath
 
 	path = config.ExpandUser("~/.config/fly/config/config.yaml")
@@ -84,6 +85,7 @@ func TestExpandUser(t *testing.T) {
 
 func TestLoad(t *testing.T) {
 	correctDir := systemDir
+	correctPath := systemPath
 	var correctCfgText = `location: Señor Sisig
 burritos: true`
 	var correctCfg = burritoConfig{
@@ -171,8 +173,8 @@ func TestNamespacePath(t *testing.T) {
 
 	// test homedir
 	// Setup
-	correctDir := userDir
-	correctPath := userPath
+	correctDir = userDir
+	correctPath = userPath
 	os.RemoveAll(systemDir)
 	os.MkdirAll(correctDir, dirMode)
 	_, err = os.Create(correctPath)
