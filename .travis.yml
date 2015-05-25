@@ -9,7 +9,7 @@ before_install:
 install:
   - go get gopkg.in/yaml.v2
 before_script:
-  - sudo mkdir -p /etc/fly/config/ && sudo chown -R $USER /etc/fly/config/
-  - mkdir -p /home/travis/.config/fly/config && sudo chown -R $USER /home/travis/.config/fly/config
+  - sudo mkdir -p /etc/testorg/testsystem/ && sudo chown -R $USER /etc/testorg/testsystem/
+  - mkdir -p /home/travis/.config/testorg/testsystem && sudo chown -R $USER /home/travis/.config/testorg/testsystem
 script:
   - $HOME/gopath/bin/goveralls -service=travis-ci
