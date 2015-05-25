@@ -10,27 +10,52 @@ import (
 	"github.com/fly/config"
 )
 
-// In this example our organization is named "podhub", and our project
-// namespace is "canary".
+type testConfig struct {
+	Example []string `yaml:"example"`
+}
+
+type burritoConfig struct {
+	Location string `yaml:"location"`
+	Burritos bool   `yaml:"burritos"`
+}
+
+// TODO: come up with a way to test homedir without hardcoding travis
+const (
+	correctEnvVar string = "TESTORG_TESTSYSTEM_CONFIG_URI"
+	systemBaseDir string = "/etc/"
+	systemDir     string = "/etc/testorg/testsystem/"
+	systemPath    string = "/etc/testorg/testsystem/config.yaml"
+	userBaseDir   string = "/home/travis/.config/"
+	userDir       string = "/home/travis/"
+	userPath      string = "/home/travis/.config/testorg/testsystem/config.yaml"
+	organization  string = "testorg"
+	system        string = "testsystem"
+)
+
+const (
+	dirMode  os.FileMode = 0755
+	fileMode os.FileMode = 0644
+)
+
+var cfgNS = config.Namespace{
+	Organization: organization,
+	System:       system,
+}
+
+// In this example our organization is named "testorganization", and our project
+// namespace is "testsystem".
 //
-// In this example we have a file located at /Users/jchen/.config/podhub/canary/config.yaml,
-// with the following contents:
+// In this example we have a file located at
+// /Users/jchen/.config/testorg/testsystem/config.yaml with the
+// following contents:
 //  example:
 //    - "a"
 //    - "b"
 //    - "c"
 func ExampleNamespace() {
-	type Config struct {
-		Example []string `yaml:"example"`
-	}
-
 	var err error
-	var cfg Config
+	var cfg testConfig
 	var path string
-	var cfgNS = config.Namespace{
-		Organization: "podhub",
-		System:       "canary",
-	}
 
 	path = cfgNS.Path()
 	fmt.Println("Path to config " + path)
@@ -43,65 +68,48 @@ func ExampleNamespace() {
 }
 
 func TestExpandUser(t *testing.T) {
-	var homeDir string
 	var path string
+	correctPath := userPath
 
-	if os.Getenv("TRAVIS") == "true" {
-		homeDir = "/home/travis"
-	} else {
-		homeDir = os.Getenv("HOME")
-	}
-	var correctPath = homeDir + "/.config/fly/config/config.yaml"
+	path = config.ExpandUser("~/.config/testorg/testsystem/config.yaml")
 
-	path = config.ExpandUser("~/.config/fly/config/config.yaml")
-
-	// docs say not to trust /home/travis to be homedir. We'll need to
-	// revisit this later.
 	if path != correctPath {
 		t.Error("Expected ", correctPath, ", got ", path)
 	}
 
-	path = config.ExpandUser("$HOME/.config/fly/config/config.yaml")
+	path = config.ExpandUser("$HOME/.config/testorg/testsystem/config.yaml")
 
-	// docs say not to trust /home/travis to be homedir. We'll need to
-	// revisit this later.
 	if path != correctPath {
 		t.Error("Expected ", correctPath, ", got ", path)
 	}
 }
 
 func TestLoad(t *testing.T) {
-	const correctDir = "/etc/fly/config/"
-	type configExample struct {
-		Location string `yaml:"location"`
-		Burritos bool   `yaml:"burritos"`
-	}
-
+	correctDir := systemDir
+	correctPath := systemPath
 	var correctCfgText = `location: Señor Sisig
 burritos: true`
-	var correctCfg = configExample{
+	var correctCfg = burritoConfig{
 		Location: "Señor Sisig",
 		Burritos: true,
 	}
 	var err error
-	var cfg configExample
-	var homeDir string
-	var dirMode os.FileMode = 0755
-	var fileMode os.FileMode = 0644
-
-	if os.Getenv("TRAVIS") == "true" {
-		homeDir = "/home/travis"
-	} else {
-		homeDir = os.Getenv("HOME")
-	}
-	const correctPath = correctDir + "config.yaml"
+	var cfg burritoConfig
 
 	// Setup
-	os.RemoveAll(homeDir + "/.config/fly/config/config.yaml")
-	os.MkdirAll(correctDir, dirMode)
+	err = os.RemoveAll(userPath)
+	if err != nil {
+		t.Error("Got an error removing ", userPath, ": ", err)
+	}
+
+	err = os.MkdirAll(correctDir, dirMode)
+	if err != nil {
+		t.Error("Got an error creating ", correctDir, ": ", err)
+	}
+
 	err = ioutil.WriteFile(correctPath, []byte(correctCfgText), fileMode)
 	if err != nil {
-		t.Error("Got an error writing ", correctPath, ", got an error: ", err)
+		t.Error("Got an error writing ", correctPath, ": ", err)
 	}
 
 	// Test
@@ -133,45 +141,36 @@ burritos: true`
 }
 
 func TestUserBase(t *testing.T) {
-	const correctUserBase = "~/.config/"
-	var userBase string
-	userBase = config.UserBase
-
-	if userBase != correctUserBase {
-		t.Error("Expecting ", correctUserBase, ", got ", userBase)
+	userbase := "~/.config/"
+	if config.UserBase != userbase {
+		t.Error("Expecting ", userbase, ", got ", config.UserBase)
 	}
 }
 
 func TestSystemBase(t *testing.T) {
-	const correctSystemBase = "/etc/"
-	var systemBase string
-	systemBase = config.SystemBase
-
-	if systemBase != correctSystemBase {
-		t.Error("Expecting ", correctSystemBase, ", got ", systemBase)
+	if config.SystemBase != systemBaseDir {
+		t.Error("Expecting ", systemBaseDir, ", got ", config.SystemBase)
 	}
 }
 
 func TestNamespacePath(t *testing.T) {
-	var correctDir = "/etc/fly/config/"
-	var cfgNS = config.Namespace{
-		Organization: "fly",
-		System:       "config",
-	}
 	var err error
 	var path string
-	var homeDir string
-	var dirMode os.FileMode = 0755
-	if os.Getenv("TRAVIS") == "true" {
-		homeDir = "/home/travis"
-	} else {
-		homeDir = os.Getenv("HOME")
-	}
-	var correctPath = correctDir + "config.yaml"
+
+	correctDir := systemDir
+	correctPath := systemPath
 
 	// Setup
-	os.RemoveAll(homeDir + "/.config/fly/config/config.yaml")
-	os.MkdirAll(correctDir, dirMode)
+	err = os.RemoveAll(userPath)
+	if err != nil {
+		t.Error("Unable to remove file ", correctPath, ", got an error: ", err)
+	}
+
+	err = os.MkdirAll(correctDir, dirMode)
+	if err != nil {
+		t.Error("Unable to create directory ", correctPath, ", got an error: ", err)
+	}
+
 	_, err = os.Create(correctPath)
 	if err != nil {
 		t.Error("Unable to create file ", correctPath, ", got an error: ", err)
@@ -192,10 +191,18 @@ func TestNamespacePath(t *testing.T) {
 
 	// test homedir
 	// Setup
-	correctDir = "/home/travis/.config/fly/config/"
-	correctPath = correctDir + "config.yaml"
-	os.RemoveAll("/etc/fly/config/")
-	os.MkdirAll(correctDir, dirMode)
+	correctDir = userDir
+	correctPath = userPath
+	err = os.RemoveAll(systemPath)
+	if err != nil {
+		t.Error("Unable to remove file ", correctPath, ", got an error: ", err)
+	}
+
+	err = os.MkdirAll(correctDir, dirMode)
+	if err != nil {
+		t.Error("Unable to create directory ", correctPath, ", got an error: ", err)
+	}
+
 	_, err = os.Create(correctPath)
 	if err != nil {
 		t.Error("Unable to create file ", correctPath, ", got an error: ", err)
@@ -216,54 +223,38 @@ func TestNamespacePath(t *testing.T) {
 }
 
 func TestNamespaceEnvVar(t *testing.T) {
-	var cfgNS = config.Namespace{
-		Organization: "fly",
-		System:       "config",
-	}
-	const correctEnvVar string = "FLY_CONFIG_CONFIG_URI"
-
-	envVarURI := cfgNS.EnvVar()
-	if envVarURI != correctEnvVar {
-		t.Error("Expecting ", correctEnvVar, ", got ", envVarURI)
+	if cfgNS.EnvVar() != correctEnvVar {
+		t.Error("Expecting ", correctEnvVar, ", got ", cfgNS.EnvVar())
 	}
 }
 
 func TestNamespaceLoad(t *testing.T) {
-	const correctDir = "/etc/fly/config/"
-	type configExample struct {
-		Location string
-		Burritos bool
-	}
+	correctDir := systemDir
+	correctPath := systemPath
 
-	var correctCfgText = `location: Señor Sisig
+	correctCfgText := `location: Señor Sisig
 burritos: true`
-	var correctCfg = configExample{
+	correctCfg := burritoConfig{
 		Location: "Señor Sisig",
 		Burritos: true,
 	}
-	var cfgNS = config.Namespace{
-		Organization: "fly",
-		System:       "config",
-	}
 	var err error
-	var cfg configExample
-	var homeDir string
-	var dirMode os.FileMode = 0755
-	var fileMode os.FileMode = 0644
-
-	if os.Getenv("TRAVIS") == "true" {
-		homeDir = "/home/travis"
-	} else {
-		homeDir = os.Getenv("HOME")
-	}
-	const correctPath = correctDir + "config.yaml"
+	var cfg burritoConfig
 
 	// Setup
-	os.RemoveAll(homeDir + "/.config/fly/config/config.yaml")
-	os.MkdirAll(correctDir, dirMode)
+	err = os.RemoveAll(userPath)
+	if err != nil {
+		t.Error("Unable to remove path ", correctPath, ", got an error: ", err)
+	}
+
+	err = os.MkdirAll(correctDir, dirMode)
+	if err != nil {
+		t.Error("Unable to create directory ", correctPath, ", got an error: ", err)
+	}
+
 	err = ioutil.WriteFile(correctPath, []byte(correctCfgText), fileMode)
 	if err != nil {
-		t.Error("Got an error writing ", correctPath, ", got an error: ", err)
+		t.Error("Got an error writing ", correctPath, ": ", err)
 	}
 
 	// Test
