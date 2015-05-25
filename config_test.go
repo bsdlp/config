@@ -133,8 +133,9 @@ burritos: true`
 }
 
 func TestUserBase(t *testing.T) {
-	if config.UserBase != userBaseDir {
-		t.Error("Expecting ", userBaseDir, ", got ", config.UserBase)
+	userbase := "~/.config"
+	if config.UserBase != userbase {
+		t.Error("Expecting ", userbase, ", got ", config.UserBase)
 	}
 }
 
