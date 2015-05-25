@@ -42,11 +42,12 @@ var cfgNS = config.Namespace{
 	System:       system,
 }
 
-// In this example our organization is named "podhub", and our project
-// namespace is "canary".
+// In this example our organization is named "testorganization", and our project
+// namespace is "testsystem".
 //
-// In this example we have a file located at /Users/jchen/.config/podhub/canary/config.yaml,
-// with the following contents:
+// In this example we have a file located at
+// /Users/jchen/.config/testorganization/testsystem/config.yaml with the
+// following contents:
 //  example:
 //    - "a"
 //    - "b"
@@ -197,8 +198,8 @@ func TestNamespacePath(t *testing.T) {
 }
 
 func TestNamespaceEnvVar(t *testing.T) {
-	if cfgNS.EnvVar() != envVar {
-		t.Error("Expecting ", envVar, ", got ", cfgNS.EnvVar())
+	if cfgNS.EnvVar() != correctEnvVar {
+		t.Error("Expecting ", correctEnvVar, ", got ", cfgNS.EnvVar())
 	}
 }
 
@@ -208,12 +209,12 @@ func TestNamespaceLoad(t *testing.T) {
 
 	correctCfgText := `location: Señor Sisig
 burritos: true`
-	correctCfg := configExample{
+	correctCfg := burritoConfig{
 		Location: "Señor Sisig",
 		Burritos: true,
 	}
 	var err error
-	var cfg configExample
+	var cfg burritoConfig
 
 	// Setup
 	os.RemoveAll(userPath)
