@@ -46,7 +46,7 @@ var cfgNS = config.Namespace{
 // namespace is "testsystem".
 //
 // In this example we have a file located at
-// /Users/jchen/.config/testorganization/testsystem/config.yaml with the
+// /Users/jchen/.config/testorg/testsystem/config.yaml with the
 // following contents:
 //  example:
 //    - "a"
@@ -71,13 +71,13 @@ func TestExpandUser(t *testing.T) {
 	var path string
 	correctPath := userPath
 
-	path = config.ExpandUser("~/.config/fly/config/config.yaml")
+	path = config.ExpandUser("~/.config/testorg/testsystem/config.yaml")
 
 	if path != correctPath {
 		t.Error("Expected ", correctPath, ", got ", path)
 	}
 
-	path = config.ExpandUser("$HOME/.config/fly/config/config.yaml")
+	path = config.ExpandUser("$HOME/.config/testorg/testsystem/config.yaml")
 
 	if path != correctPath {
 		t.Error("Expected ", correctPath, ", got ", path)
