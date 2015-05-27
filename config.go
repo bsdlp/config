@@ -38,7 +38,6 @@ const (
 // Load reads the contents of the src URI and unmarshals into dst using
 // go-yaml.
 func Load(src string, dst interface{}) (err error) {
-	var data []byte
 	dstv := reflect.ValueOf(dst)
 
 	if dstv.Kind() != reflect.Ptr {
@@ -51,6 +50,7 @@ func Load(src string, dst interface{}) (err error) {
 		return err
 	}
 
+	var data []byte
 	switch {
 	case uri.Scheme == "file" || uri.Scheme == "":
 		path := ExpandUser(uri.Path)
