@@ -260,6 +260,11 @@ func TestNewConfigFromNamespace(t *testing.T) {
 		t.Error("Expecting no error, got", err)
 	}
 
+	_, err = config.NewConfigFromNamespace("nonexistent", "blabber")
+	if err == nil {
+		t.Error("Expecting an error loading invalid namespace, got nil")
+	}
+
 	err = os.RemoveAll(correctPath)
 	if err != nil {
 		t.Error("Unable to remove file ", correctPath,
