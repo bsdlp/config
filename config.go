@@ -35,6 +35,19 @@ const (
 	SystemBase string = "/etc/"
 )
 
+// NewConfigFromNamespace returns config object from provided params.
+func NewConfigFromNamespace(organization string, system string) (c *Config, err error) {
+	var cfgNS = Namespace{
+		Organization: organization,
+		System:       system,
+	}
+	err = cfgNS.Load(c)
+	if err != nil {
+		return
+	}
+	return
+}
+
 // Load reads the contents of the src URI and unmarshals into dst using
 // go-yaml.
 func Load(src string, dst interface{}) (err error) {
