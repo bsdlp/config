@@ -228,6 +228,45 @@ func TestNamespaceEnvVar(t *testing.T) {
 	}
 }
 
+func TestNewConfigFromNamespace(t *testing.T) {
+	const (
+		organization = "testorg"
+		system       = "testsystem"
+	)
+
+	var err error
+
+	correctDir := systemDir
+	correctPath := systemPath
+
+	// Setup
+	err = os.RemoveAll(userPath)
+	if err != nil {
+		t.Error("Unable to remove file ", userPath, ", got an error: ", err)
+	}
+
+	err = os.MkdirAll(correctDir, dirMode)
+	if err != nil {
+		t.Error("Unable to create directory ", correctPath, ", got an error: ", err)
+	}
+
+	_, err = os.Create(correctPath)
+	if err != nil {
+		t.Error("Unable to create file ", correctPath, ", got an error: ", err)
+	}
+
+	_, err = config.NewConfigFromNamespace(organization, system)
+	if err != nil {
+		t.Error("Expecting no error, got", err)
+	}
+
+	err = os.RemoveAll(correctPath)
+	if err != nil {
+		t.Error("Unable to remove file ", correctPath,
+			" in teardown, got an error: ", err)
+	}
+}
+
 func TestNamespaceLoad(t *testing.T) {
 	correctDir := systemDir
 	correctPath := systemPath
