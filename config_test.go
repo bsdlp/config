@@ -230,8 +230,8 @@ func TestNamespaceEnvVar(t *testing.T) {
 
 func TestNewConfigFromNamespace(t *testing.T) {
 	const (
-		organization = "fly"
-		system       = "config"
+		organization = "testorg"
+		system       = "testsystem"
 	)
 
 	var err error
