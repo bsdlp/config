@@ -23,11 +23,6 @@ type Namespace struct {
 	System       string // Name of the system associated with this config.
 }
 
-// The Config interface implements config.
-type Config interface {
-	Load(src string, dst interface{}) error
-}
-
 // UserBase and SystemBase are the prefixes for the user and system config
 // paths, respectively.
 const (
@@ -36,7 +31,7 @@ const (
 )
 
 // NewConfigFromNamespace returns config object from provided params.
-func NewConfigFromNamespace(organization string, system string) (c *Config, err error) {
+func NewConfigFromNamespace(organization string, system string) (c interface{}, err error) {
 	var cfgNS = Namespace{
 		Organization: organization,
 		System:       system,
@@ -113,29 +108,29 @@ func ExpandUser(path string) (exPath string) {
 // 1. User config (~/.config/podhub/canary/config.yaml)
 //
 // 2. System config (/etc/podhub/canary/config.yaml)
-func (c Namespace) Path() (path string) {
-	systemPath := c.systemURI().Path
+func (ns *Namespace) Path() (path string) {
+	systemPath := ns.systemURI().Path
 	if _, err := os.Stat(systemPath); err == nil {
 		path = systemPath
 	}
 
-	userPath := c.userURI().Path
+	userPath := ns.userURI().Path
 	if _, err := os.Stat(userPath); err == nil {
 		path = userPath
 	}
 	return
 }
 
-func (c Namespace) systemURI() (uri url.URL) {
-	path := filepath.Join(SystemBase, c.Organization, c.System, "config.yaml")
+func (ns *Namespace) systemURI() (uri url.URL) {
+	path := filepath.Join(SystemBase, ns.Organization, ns.System, "config.yaml")
 	uri = url.URL{Path: path, Scheme: "file"}
 	return
 }
 
-func (c Namespace) userURI() (uri url.URL) {
+func (ns *Namespace) userURI() (uri url.URL) {
 	userBase := ExpandUser(UserBase)
 
-	path := filepath.Join(userBase, c.Organization, c.System, "config.yaml")
+	path := filepath.Join(userBase, ns.Organization, ns.System, "config.yaml")
 	uri = url.URL{Path: path, Scheme: "file"}
 	return
 }
@@ -143,16 +138,16 @@ func (c Namespace) userURI() (uri url.URL) {
 // EnvVar returns the name of the environment variable containing the URI
 // of the config.
 // Example: PODHUB_UUIDD_CONFIG_URI
-func (c Namespace) EnvVar() (envvar string) {
-	s := []string{c.Organization, c.System, "CONFIG", "URI"}
+func (ns *Namespace) EnvVar() (envvar string) {
+	s := []string{ns.Organization, ns.System, "CONFIG", "URI"}
 	envvar = strings.ToUpper(strings.Join(s, "_"))
 	return
 }
 
 // Load is a convenience function registered to config.Namespace to
 // implement Config.Load().
-func (c Namespace) Load(dst interface{}) (err error) {
-	cfgPath := c.Path()
+func (ns *Namespace) Load(dst interface{}) (err error) {
+	cfgPath := ns.Path()
 
 	err = Load(cfgPath, dst)
 	return
