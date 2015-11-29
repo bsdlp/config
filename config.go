@@ -23,11 +23,6 @@ type Namespace struct {
 	System       string // Name of the system associated with this config.
 }
 
-// The Config interface implements config.
-type Config interface {
-	Load(src string, dst interface{}) error
-}
-
 // UserBase and SystemBase are the prefixes for the user and system config
 // paths, respectively.
 const (
@@ -35,22 +30,7 @@ const (
 	SystemBase string = "/etc/"
 )
 
-// NewConfigFromNamespace returns config object from provided params.
-func NewConfigFromNamespace(organization string, system string) (c *Config, err error) {
-	var cfgNS = Namespace{
-		Organization: organization,
-		System:       system,
-	}
-	err = cfgNS.Load(c)
-	if err != nil {
-		return
-	}
-	return
-}
-
-// Load reads the contents of the src URI and unmarshals into dst using
-// go-yaml.
-func Load(src string, dst interface{}) (err error) {
+func load(src string, dst interface{}) (err error) {
 	dstv := reflect.ValueOf(dst)
 
 	if dstv.Kind() != reflect.Ptr {
@@ -66,8 +46,7 @@ func Load(src string, dst interface{}) (err error) {
 	var data []byte
 	switch {
 	case uri.Scheme == "file" || uri.Scheme == "":
-		path := ExpandUser(uri.Path)
-		data, err = ioutil.ReadFile(path)
+		data, err = ioutil.ReadFile(uri.Path)
 		if err != nil {
 			return err
 		}
@@ -149,11 +128,20 @@ func (c Namespace) EnvVar() (envvar string) {
 	return
 }
 
+// ErrConfigFileNotFound is returned when config files at $HOME/:organization/:system/config.yaml
+// or /etc/:organization/:systems/config.yaml are missing
+var ErrConfigFileNotFound = errors.New("config: missing config files")
+
 // Load is a convenience function registered to config.Namespace to
 // implement Config.Load().
 func (c Namespace) Load(dst interface{}) (err error) {
 	cfgPath := c.Path()
 
-	err = Load(cfgPath, dst)
+	if cfgPath == "" {
+		err = ErrConfigFileNotFound
+		return
+	}
+
+	err = load(cfgPath, dst)
 	return
 }

@@ -84,62 +84,6 @@ func TestExpandUser(t *testing.T) {
 	}
 }
 
-func TestLoad(t *testing.T) {
-	correctDir := systemDir
-	correctPath := systemPath
-	var correctCfgText = `location: Señor Sisig
-burritos: true`
-	var correctCfg = burritoConfig{
-		Location: "Señor Sisig",
-		Burritos: true,
-	}
-	var err error
-	var cfg burritoConfig
-
-	// Setup
-	err = os.RemoveAll(userPath)
-	if err != nil {
-		t.Error("Got an error removing ", userPath, ": ", err)
-	}
-
-	err = os.MkdirAll(correctDir, dirMode)
-	if err != nil {
-		t.Error("Got an error creating ", correctDir, ": ", err)
-	}
-
-	err = ioutil.WriteFile(correctPath, []byte(correctCfgText), fileMode)
-	if err != nil {
-		t.Error("Got an error writing ", correctPath, ": ", err)
-	}
-
-	// Test
-	err = config.Load(correctPath, &cfg)
-	if err != nil {
-		t.Error("Got an error: ", err, ", expecting nil")
-	}
-
-	if cfg != correctCfg {
-		t.Error("Expecting ", correctCfg, ", got ", cfg)
-	}
-
-	err = config.Load(correctPath, cfg)
-	if err.Error() != "config: not a pointer" {
-		t.Error("Expecting error: config: not a pointer, instead got", err)
-	}
-
-	err = config.Load("rumpelstilzjchen", &cfg)
-	if err == nil {
-		t.Error("Expected read error, got nil")
-	}
-
-	// Teardown
-	err = os.RemoveAll(correctPath)
-	if err != nil {
-		t.Error("Unable to remove file ", correctPath,
-			" in teardown, got an error: ", err)
-	}
-}
-
 func TestUserBase(t *testing.T) {
 	userbase := "~/.config/"
 	if config.UserBase != userbase {
@@ -253,16 +197,6 @@ func TestNewConfigFromNamespace(t *testing.T) {
 	_, err = os.Create(correctPath)
 	if err != nil {
 		t.Error("Unable to create file ", correctPath, ", got an error: ", err)
-	}
-
-	_, err = config.NewConfigFromNamespace(organization, system)
-	if err != nil {
-		t.Error("Expecting no error, got", err)
-	}
-
-	_, err = config.NewConfigFromNamespace("nonexistent", "blabber")
-	if err == nil {
-		t.Error("Expecting an error loading invalid namespace, got nil")
 	}
 
 	err = os.RemoveAll(correctPath)
