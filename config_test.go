@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/fly/config"
+	"github.com/bsdlp/config"
 )
 
 type testConfig struct {
