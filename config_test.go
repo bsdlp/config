@@ -1,13 +1,13 @@
-package config_test
+package config
 
 import (
-	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
-	"testing"
+	"os/user"
+	"path/filepath"
 
-	"github.com/bsdlp/config"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 type testConfig struct {
@@ -19,17 +19,14 @@ type burritoConfig struct {
 	Burritos bool   `yaml:"burritos"`
 }
 
-// TODO: come up with a way to test homedir without hardcoding travis
 const (
-	correctEnvVar string = "TESTORG_TESTSYSTEM_CONFIG_URI"
+	correctEnvVar string = "TESTORG_TESTSERVICE_CONFIG_URI"
 	systemBaseDir string = "/etc/"
-	systemDir     string = "/etc/testorg/testsystem/"
-	systemPath    string = "/etc/testorg/testsystem/config.yaml"
-	userBaseDir   string = "/home/travis/.config/"
-	userDir       string = "/home/travis/"
-	userPath      string = "/home/travis/.config/testorg/testsystem/config.yaml"
+	systemDir     string = "/etc/testorg/testservice/"
+	systemPath    string = "/etc/testorg/testservice/config.yaml"
 	organization  string = "testorg"
-	system        string = "testsystem"
+	service       string = "testservice"
+	testUsername  string = "testuser"
 )
 
 const (
@@ -37,218 +34,36 @@ const (
 	fileMode os.FileMode = 0644
 )
 
-var cfgNS = config.Namespace{
-	Organization: organization,
-	System:       system,
-}
-
-// In this example our organization is named "testorganization", and our project
-// namespace is "testsystem".
-//
-// In this example we have a file located at
-// /Users/jchen/.config/testorg/testsystem/config.yaml with the
-// following contents:
-//  example:
-//    - "a"
-//    - "b"
-//    - "c"
-func ExampleNamespace() {
-	var err error
-	var cfg testConfig
-	var path string
-
-	path = cfgNS.Path()
-	fmt.Println("Path to config " + path)
-
-	err = cfgNS.Load(&cfg)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	fmt.Println("Contents of cfg " + fmt.Sprint(cfg))
-}
-
-func TestExpandUser(t *testing.T) {
-	var path string
-	correctPath := userPath
-
-	path = config.ExpandUser("~/.config/testorg/testsystem/config.yaml")
-
-	if path != correctPath {
-		t.Error("Expected ", correctPath, ", got ", path)
-	}
-
-	path = config.ExpandUser("$HOME/.config/testorg/testsystem/config.yaml")
-
-	if path != correctPath {
-		t.Error("Expected ", correctPath, ", got ", path)
-	}
-}
-
-func TestUserBase(t *testing.T) {
-	userbase := "~/.config/"
-	if config.UserBase != userbase {
-		t.Error("Expecting ", userbase, ", got ", config.UserBase)
-	}
-}
-
-func TestSystemBase(t *testing.T) {
-	if config.SystemBase != systemBaseDir {
-		t.Error("Expecting ", systemBaseDir, ", got ", config.SystemBase)
-	}
-}
-
-func TestNamespacePath(t *testing.T) {
-	var err error
-	var path string
-
-	correctDir := systemDir
-	correctPath := systemPath
-
-	// Setup
-	err = os.RemoveAll(userPath)
-	if err != nil {
-		t.Error("Unable to remove file ", correctPath, ", got an error: ", err)
-	}
-
-	err = os.MkdirAll(correctDir, dirMode)
-	if err != nil {
-		t.Error("Unable to create directory ", correctPath, ", got an error: ", err)
-	}
-
-	_, err = os.Create(correctPath)
-	if err != nil {
-		t.Error("Unable to create file ", correctPath, ", got an error: ", err)
-	}
-
-	// Test
-	path = cfgNS.Path()
-	if path != correctPath {
-		t.Error("Expecting ", correctPath, ", got ", path)
-	}
-
-	// Teardown
-	err = os.RemoveAll(correctPath)
-	if err != nil {
-		t.Error("Unable to remove file ", correctPath,
-			" in teardown, got an error: ", err)
-	}
-
-	// test homedir
-	// Setup
-	correctDir = userDir
-	correctPath = userPath
-	err = os.RemoveAll(systemPath)
-	if err != nil {
-		t.Error("Unable to remove file ", correctPath, ", got an error: ", err)
-	}
-
-	err = os.MkdirAll(correctDir, dirMode)
-	if err != nil {
-		t.Error("Unable to create directory ", correctPath, ", got an error: ", err)
-	}
-
-	_, err = os.Create(correctPath)
-	if err != nil {
-		t.Error("Unable to create file ", correctPath, ", got an error: ", err)
-	}
-
-	// Test
-	path = cfgNS.Path()
-	if path != correctPath {
-		t.Error("Expecting ", correctPath, ", got ", path)
-	}
-
-	// Teardown
-	err = os.RemoveAll(correctPath)
-	if err != nil {
-		t.Error("Unable to remove file ", correctPath,
-			" in teardown, got an error: ", err)
-	}
-}
-
-func TestNamespaceEnvVar(t *testing.T) {
-	if cfgNS.EnvVar() != correctEnvVar {
-		t.Error("Expecting ", correctEnvVar, ", got ", cfgNS.EnvVar())
-	}
-}
-
-func TestNewConfigFromNamespace(t *testing.T) {
-	const (
-		organization = "testorg"
-		system       = "testsystem"
+var _ = Describe("Config", func() {
+	var (
+		cfg         Config
+		testUser    *user.User
+		testHomeDir string
 	)
 
-	var err error
+	BeforeEach(func() {
+		cfg = Config{
+			Organization: organization,
+			Service:      service,
+		}
+		tmpDir, err := ioutil.TempDir("", "config_test")
+		Ω(err).Should(BeNil())
+		testHomeDir = tmpDir
+		testUser = &user.User{
+			HomeDir: testHomeDir,
+		}
+	})
 
-	correctDir := systemDir
-	correctPath := systemPath
+	AfterEach(func() {
+		err := os.RemoveAll(testHomeDir)
+		Ω(err).Should(BeNil())
+	})
 
-	// Setup
-	err = os.RemoveAll(userPath)
-	if err != nil {
-		t.Error("Unable to remove file ", userPath, ", got an error: ", err)
-	}
-
-	err = os.MkdirAll(correctDir, dirMode)
-	if err != nil {
-		t.Error("Unable to create directory ", correctPath, ", got an error: ", err)
-	}
-
-	_, err = os.Create(correctPath)
-	if err != nil {
-		t.Error("Unable to create file ", correctPath, ", got an error: ", err)
-	}
-
-	err = os.RemoveAll(correctPath)
-	if err != nil {
-		t.Error("Unable to remove file ", correctPath,
-			" in teardown, got an error: ", err)
-	}
-}
-
-func TestNamespaceLoad(t *testing.T) {
-	correctDir := systemDir
-	correctPath := systemPath
-
-	correctCfgText := `location: Señor Sisig
-burritos: true`
-	correctCfg := burritoConfig{
-		Location: "Señor Sisig",
-		Burritos: true,
-	}
-	var err error
-	var cfg burritoConfig
-
-	// Setup
-	err = os.RemoveAll(userPath)
-	if err != nil {
-		t.Error("Unable to remove path ", correctPath, ", got an error: ", err)
-	}
-
-	err = os.MkdirAll(correctDir, dirMode)
-	if err != nil {
-		t.Error("Unable to create directory ", correctPath, ", got an error: ", err)
-	}
-
-	err = ioutil.WriteFile(correctPath, []byte(correctCfgText), fileMode)
-	if err != nil {
-		t.Error("Got an error writing ", correctPath, ": ", err)
-	}
-
-	// Test
-	err = cfgNS.Load(&cfg)
-	if err != nil {
-		t.Error("Got an error: ", err, ", expecting nil")
-	}
-
-	if cfg != correctCfg {
-		t.Error("Expecting ", correctCfg, ", got ", cfg)
-	}
-
-	// Teardown
-	err = os.RemoveAll(correctPath)
-	if err != nil {
-		t.Error("Unable to remove file ", correctPath,
-			" in teardown, got an error: ", err)
-	}
-}
+	It("can expand paths", func() {
+		Ω(testUser.HomeDir).Should(Equal(testHomeDir))
+		Ω(expandUser(testUser, "~/")).Should(Equal(testHomeDir))
+		Ω(expandUser(testUser, "$HOME/")).Should(Equal(testHomeDir))
+		Ω(expandUser(testUser, "~/test")).Should(Equal(filepath.Join(testHomeDir, "test")))
+		Ω(expandUser(testUser, "$HOME/test")).Should(Equal(filepath.Join(testHomeDir, "test")))
+	})
+})

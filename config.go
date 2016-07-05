@@ -12,16 +12,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
-
-	"gopkg.in/yaml.v2"
 )
-
-// Namespace holds the pieces joined together to form the
-// directory namespacing for config.
-type Namespace struct {
-	Organization string // optional additional namespace for orgs.
-	System       string // Name of the system associated with this config.
-}
 
 // UserBase and SystemBase are the prefixes for the user and system config
 // paths, respectively.
@@ -30,7 +21,39 @@ const (
 	SystemBase string = "/etc/"
 )
 
-func load(src string, dst interface{}) (err error) {
+// Unmarshaller defines the function signature for unmarshal functions
+type Unmarshaller func(data []byte, v interface{}) error
+
+// Config implements Loader
+type Config struct {
+	// optional additional namespace for orgs.
+	Organization string
+
+	// Name of the service associated with this config.
+	Service string
+
+	// Unmarshaller used to unmarshal config data
+	Unmarshaller Unmarshaller
+}
+
+var (
+	// ErrNilUnmarshaller is returned when an undefined unmarshaller is passed to
+	// load()
+	ErrNilUnmarshaller = errors.New("config: nil unmarshaller")
+
+	// ErrConfigFileNotFound is returned when config files at $HOME/:organization/:system/config.yaml
+	// or /etc/:organization/:systems/config.yaml are missing
+	ErrConfigFileNotFound = errors.New("config: missing config files")
+)
+
+// load reads the contents of the file at the provided src uri and uses the
+// provided unmarshaller to
+func load(unmarshaller Unmarshaller, src string, dst interface{}) (err error) {
+	if unmarshaller == nil {
+		err = ErrNilUnmarshaller
+		return
+	}
+
 	dstv := reflect.ValueOf(dst)
 
 	if dstv.Kind() != reflect.Ptr {
@@ -64,21 +87,17 @@ func load(src string, dst interface{}) (err error) {
 		}
 	}
 
-	err = yaml.Unmarshal(data, dst)
+	err = unmarshaller(data, dst)
 	return
 }
 
-// ExpandUser acts kind of like os.path.expanduser in Python, except only
-// supports expanding "~/" or "$HOME"
-func ExpandUser(path string) (exPath string) {
-	usr, _ := user.Current()
-
+func expandUser(usr *user.User, path string) (exPath string) {
 	dir := fmt.Sprintf("%s/", usr.HomeDir)
 
 	exPath = path
-	if len(path) > 2 && path[:2] == "~/" {
+	if len(path) >= 2 && path[:2] == "~/" {
 		exPath = strings.Replace(exPath, "~/", dir, 1)
-	} else if len(path) > 5 && path[:5] == "$HOME" {
+	} else if len(path) >= 5 && path[:5] == "$HOME" {
 		exPath = strings.Replace(exPath, "$HOME", dir, 1)
 	}
 
@@ -86,35 +105,58 @@ func ExpandUser(path string) (exPath string) {
 	return
 }
 
+// ExpandUser acts kind of like os.path.expanduser in Python, except only
+// supports expanding "~/" or "$HOME"
+func ExpandUser(path string) (exPath string) {
+	usr, err := user.Current()
+	if usr == nil || err != nil {
+		return
+	}
+	exPath = expandUser(usr, path)
+	return
+}
+
 // Path returns path to config, chosen by hierarchy and checked for
 // existence:
 //
-// 1. User config (~/.config/podhub/canary/config.yaml)
+// 1. {ORGANIZATION}_{SERVICE}_CONFIG_URI environment variable
 //
-// 2. System config (/etc/podhub/canary/config.yaml)
-func (c Namespace) Path() (path string) {
-	systemPath := c.systemURI().Path
-	if _, err := os.Stat(systemPath); err == nil {
-		path = systemPath
+// 2. User config (~/.config/podhub/canary/config.yaml)
+//
+// 3. System config (/etc/podhub/canary/config.yaml)
+func (c Config) Path() (path string) {
+	envVarPath := c.EnvVar()
+	if envVarPath != "" {
+		if _, err := os.Stat(envVarPath); err == nil {
+			path = envVarPath
+			return
+		}
 	}
 
 	userPath := c.userURI().Path
 	if _, err := os.Stat(userPath); err == nil {
 		path = userPath
+		return
+	}
+
+	systemPath := c.systemURI().Path
+	if _, err := os.Stat(systemPath); err == nil {
+		path = systemPath
+		return
 	}
 	return
 }
 
-func (c Namespace) systemURI() (uri url.URL) {
-	path := filepath.Join(SystemBase, c.Organization, c.System, "config.yaml")
+func (c Config) systemURI() (uri url.URL) {
+	path := filepath.Join(SystemBase, c.Organization, c.Service, "config.yaml")
 	uri = url.URL{Path: path, Scheme: "file"}
 	return
 }
 
-func (c Namespace) userURI() (uri url.URL) {
+func (c Config) userURI() (uri url.URL) {
 	userBase := ExpandUser(UserBase)
 
-	path := filepath.Join(userBase, c.Organization, c.System, "config.yaml")
+	path := filepath.Join(userBase, c.Organization, c.Service, "config.yaml")
 	uri = url.URL{Path: path, Scheme: "file"}
 	return
 }
@@ -122,19 +164,15 @@ func (c Namespace) userURI() (uri url.URL) {
 // EnvVar returns the name of the environment variable containing the URI
 // of the config.
 // Example: PODHUB_UUIDD_CONFIG_URI
-func (c Namespace) EnvVar() (envvar string) {
-	s := []string{c.Organization, c.System, "CONFIG", "URI"}
+func (c Config) EnvVar() (envvar string) {
+	s := []string{c.Organization, c.Service, "CONFIG", "URI"}
 	envvar = strings.ToUpper(strings.Join(s, "_"))
 	return
 }
 
-// ErrConfigFileNotFound is returned when config files at $HOME/:organization/:system/config.yaml
-// or /etc/:organization/:systems/config.yaml are missing
-var ErrConfigFileNotFound = errors.New("config: missing config files")
-
 // Load is a convenience function registered to config.Namespace to
 // implement Config.Load().
-func (c Namespace) Load(dst interface{}) (err error) {
+func (c Config) Load(dst interface{}) (err error) {
 	cfgPath := c.Path()
 
 	if cfgPath == "" {
@@ -142,6 +180,6 @@ func (c Namespace) Load(dst interface{}) (err error) {
 		return
 	}
 
-	err = load(cfgPath, dst)
+	err = load(c.Unmarshaller, cfgPath, dst)
 	return
 }
