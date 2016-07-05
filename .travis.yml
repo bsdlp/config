@@ -1,15 +1,22 @@
 language: go
+
 sudo: required
+
 go:
   - tip
+  - 1.6.2
+
 before_install:
   - go get github.com/axw/gocov/gocov
   - go get github.com/mattn/goveralls
-  - if ! go get code.google.com/p/go.tools/cmd/cover; then go get golang.org/x/tools/cmd/cover; fi
+  - go get golang.org/x/tools/cmd/cover
+
 install:
   - ln -s _vendor vendor
+
 before_script:
-  - sudo mkdir -p /etc/testorg/testsystem/ && sudo chown -R $USER /etc/testorg/testsystem/
-  - mkdir -p /home/travis/.config/testorg/testsystem && sudo chown -R $USER /home/travis/.config/testorg/testsystem
+  - sudo mkdir -p /etc/testorg/testservice/ && sudo chown -R $USER /etc/testorg/testservice/
+  - mkdir -p /home/travis/.config/testorg/testservice && sudo chown -R $USER /home/travis/.config/testorg/testservice
+
 script:
   - $HOME/gopath/bin/goveralls -service=travis-ci
