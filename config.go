@@ -24,6 +24,15 @@ const (
 // Unmarshaller defines the function signature for unmarshal functions
 type Unmarshaller func(data []byte, v interface{}) error
 
+// FileFormat is the type of config file to unmarshal
+type FileFormat struct {
+	// file extension, i.e. "yaml" for a file named "config.yaml"
+	Extension string
+
+	// Unmarshaller used to unmarshal config data
+	Unmarshaller Unmarshaller
+}
+
 // Config implements Loader
 type Config struct {
 	// optional additional namespace for orgs.
@@ -32,8 +41,8 @@ type Config struct {
 	// Name of the service associated with this config.
 	Service string
 
-	// Unmarshaller used to unmarshal config data
-	Unmarshaller Unmarshaller
+	// describes the type of config file to unmarshal
+	FileFormat FileFormat
 }
 
 var (
@@ -41,8 +50,8 @@ var (
 	// load()
 	ErrNilUnmarshaller = errors.New("config: nil unmarshaller")
 
-	// ErrConfigFileNotFound is returned when config files at $HOME/:organization/:system/config.yaml
-	// or /etc/:organization/:systems/config.yaml are missing
+	// ErrConfigFileNotFound is returned when config files at $HOME/:organization/:system/config.{extension}
+	// or /etc/:organization/:systems/config.{extension} are missing
 	ErrConfigFileNotFound = errors.New("config: missing config files")
 )
 
@@ -121,9 +130,9 @@ func ExpandUser(path string) (exPath string) {
 //
 // 1. {ORGANIZATION}_{SERVICE}_CONFIG_URI environment variable
 //
-// 2. User config (~/.config/podhub/canary/config.yaml)
+// 2. User config (~/.config/podhub/canary/config.{extension})
 //
-// 3. System config (/etc/podhub/canary/config.yaml)
+// 3. System config (/etc/podhub/canary/config.{extension})
 func (c Config) Path() (path string) {
 	envVarPath := c.EnvVar()
 	if envVarPath != "" {
@@ -147,8 +156,17 @@ func (c Config) Path() (path string) {
 	return
 }
 
+const fileNamePrefix = "config"
+
+func (c Config) fileName() string {
+	if c.FileFormat == nil || c.FileFormat.Extension == "" {
+		return fileNamePrefix
+	}
+	return fmt.Sprintf("%s.%s", fileNamePrefix, c.FileFormat.Extension)
+}
+
 func (c Config) systemURI() (uri url.URL) {
-	path := filepath.Join(SystemBase, c.Organization, c.Service, "config.yaml")
+	path := filepath.Join(SystemBase, c.Organization, c.Service, c.fileName())
 	uri = url.URL{Path: path, Scheme: "file"}
 	return
 }
@@ -156,7 +174,7 @@ func (c Config) systemURI() (uri url.URL) {
 func (c Config) userURI() (uri url.URL) {
 	userBase := ExpandUser(UserBase)
 
-	path := filepath.Join(userBase, c.Organization, c.Service, "config.yaml")
+	path := filepath.Join(userBase, c.Organization, c.Service, c.fileName())
 	uri = url.URL{Path: path, Scheme: "file"}
 	return
 }
