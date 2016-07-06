@@ -42,13 +42,16 @@ type Config struct {
 	Service string
 
 	// describes the type of config file to unmarshal
-	FileFormat FileFormat
+	FileFormat *FileFormat
 }
 
 var (
 	// ErrNilUnmarshaller is returned when an undefined unmarshaller is passed to
 	// load()
 	ErrNilUnmarshaller = errors.New("config: nil unmarshaller")
+
+	// ErrNilFileFormat is returned when the config struct contains a nil FileFormat
+	ErrNilFileFormat = errors.New("config: file format undefined")
 
 	// ErrConfigFileNotFound is returned when config files at $HOME/:organization/:system/config.{extension}
 	// or /etc/:organization/:systems/config.{extension} are missing
@@ -196,6 +199,11 @@ func (c Config) EnvVar() (envvar string) {
 // Load is a convenience function registered to config.Namespace to
 // implement Config.Load().
 func (c Config) Load(dst interface{}) (err error) {
+	if c.FileFormat == nil {
+		err = ErrNilFileFormat
+		return
+	}
+
 	cfgPath := c.Path()
 
 	if cfgPath == "" {
@@ -203,6 +211,6 @@ func (c Config) Load(dst interface{}) (err error) {
 		return
 	}
 
-	err = load(c.Unmarshaller, cfgPath, dst)
+	err = load(c.FileFormat.Unmarshaller, cfgPath, dst)
 	return
 }
