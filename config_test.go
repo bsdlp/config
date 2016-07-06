@@ -6,6 +6,8 @@ import (
 	"os/user"
 	"path/filepath"
 
+	"gopkg.in/yaml.v2"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -27,6 +29,7 @@ const (
 	organization  string = "testorg"
 	service       string = "testservice"
 	testUsername  string = "testuser"
+	yamlExtension string = "yaml"
 )
 
 const (
@@ -45,6 +48,10 @@ var _ = Describe("Config", func() {
 		cfg = Config{
 			Organization: organization,
 			Service:      service,
+			FileFormat: &FileFormat{
+				Extension:    yamlExtension,
+				Unmarshaller: yaml.Unmarshal,
+			},
 		}
 		tmpDir, err := ioutil.TempDir("", "config_test")
 		Ω(err).Should(BeNil())
@@ -70,5 +77,9 @@ var _ = Describe("Config", func() {
 	It("looks for the right envvar", func() {
 		Ω(cfg.EnvVar()).Should(Equal("TESTORG_TESTSERVICE_CONFIG_URI"))
 		Ω(Config{Service: "testservice"}.EnvVar()).Should(Equal("TESTSERVICE_CONFIG_URI"))
+	})
+
+	It("returns the right file name", func() {
+		Ω(cfg.fileName()).Should(Equal("config.yaml"))
 	})
 })
