@@ -66,4 +66,9 @@ var _ = Describe("Config", func() {
 		Ω(expandUser(testUser, "~/test")).Should(Equal(filepath.Join(testHomeDir, "test")))
 		Ω(expandUser(testUser, "$HOME/test")).Should(Equal(filepath.Join(testHomeDir, "test")))
 	})
+
+	It("looks for the right envvar", func() {
+		Ω(cfg.EnvVar()).Should(Equal("TESTORG_TESTSERVICE_CONFIG_URI"))
+		Ω(Config{Service: "testservice"}.EnvVar()).Should(Equal("TESTSERVICE_CONFIG_URI"))
+	})
 })
