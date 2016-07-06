@@ -165,7 +165,12 @@ func (c Config) userURI() (uri url.URL) {
 // of the config.
 // Example: PODHUB_UUIDD_CONFIG_URI
 func (c Config) EnvVar() (envvar string) {
-	s := []string{c.Organization, c.Service, "CONFIG", "URI"}
+	var s []string
+	if c.Organization == "" {
+		s = []string{c.Service, "CONFIG", "URI"}
+	} else {
+		s = []string{c.Organization, c.Service, "CONFIG", "URI"}
+	}
 	envvar = strings.ToUpper(strings.Join(s, "_"))
 	return
 }
