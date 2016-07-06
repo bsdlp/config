@@ -7,11 +7,11 @@
 ## Installation:
 
 ```
-go get -u gopkg.in/bsdlp/config.v1
+go get -u github.com/bsdlp/config
 ```
 
 ## Usage:
 
 ```
-import "gopkg.in/bsdlp/config.v1"
+import "github.com/bsdlp/config"
 ```
