@@ -4,6 +4,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -56,7 +57,61 @@ var (
 	// ErrConfigFileNotFound is returned when config files at $HOME/:organization/:system/config.{extension}
 	// or /etc/:organization/:systems/config.{extension} are missing
 	ErrConfigFileNotFound = errors.New("config: missing config files")
+
+	// ErrNotAPointer is returned when a non-pointer is passed into load
+	ErrNotAPointer = errors.New("config: not a pointer")
 )
+
+// readHTTP reads *http.Response.ContentLength bytes of *http.Response.Body
+// and returns as []byte
+func readHTTP(uri string) (data []byte, err error) {
+	resp, err := http.Get(uri)
+	if err != nil {
+		return
+	}
+
+	defer func() {
+		closeErr := resp.Body.Close()
+		if err == nil {
+			err = closeErr
+		}
+		return
+	}()
+
+	data = make([]byte, 0, resp.ContentLength)
+	bytesRead, err := io.ReadFull(resp.Body, data)
+	if err != nil {
+		return
+	}
+	if int64(bytesRead) != resp.ContentLength {
+		err = fmt.Errorf("config: incomplete http response read: %d bytes read of content-length %d", bytesRead, resp.ContentLength)
+		return
+	}
+	return
+}
+
+func uriParser(src string) (data []byte, err error) {
+	uri, err := url.Parse(src)
+	if err != nil {
+		return
+	}
+
+	switch {
+	case uri.Scheme == "file" || uri.Scheme == "":
+		data, err = ioutil.ReadFile(uri.Path)
+		if err != nil {
+			return
+		}
+		return
+	case uri.Scheme == "http" || uri.Scheme == "https":
+		data, err = readHTTP(uri.String())
+		if err != nil {
+			return
+		}
+		return
+	}
+	return
+}
 
 // load reads the contents of the file at the provided src uri and uses the
 // provided unmarshaller to
@@ -66,40 +121,20 @@ func load(unmarshaller Unmarshaller, src string, dst interface{}) (err error) {
 		return
 	}
 
-	dstv := reflect.ValueOf(dst)
-
-	if dstv.Kind() != reflect.Ptr {
-		err = errors.New("config: not a pointer")
+	if reflect.ValueOf(dst).Kind() != reflect.Ptr {
+		err = ErrNotAPointer
 		return
 	}
 
-	uri, err := url.Parse(src)
+	data, err := uriParser(src)
 	if err != nil {
-		return err
-	}
-
-	var data []byte
-	switch {
-	case uri.Scheme == "file" || uri.Scheme == "":
-		data, err = ioutil.ReadFile(uri.Path)
-		if err != nil {
-			return err
-		}
-	case uri.Scheme == "http" || uri.Scheme == "https":
-		resp, err := http.Get(uri.String())
-		if err != nil {
-			return err
-		}
-
-		data, err = ioutil.ReadAll(resp.Body)
-
-		resp.Body.Close()
-		if err != nil {
-			return err
-		}
+		return
 	}
 
 	err = unmarshaller(data, dst)
+	if err != nil {
+		return
+	}
 	return
 }
 
