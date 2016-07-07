@@ -7,9 +7,11 @@ go:
   - 1.6.2
 
 before_install:
-  - go get github.com/axw/gocov/gocov
-  - go get github.com/mattn/goveralls
-  - go get golang.org/x/tools/cmd/cover
+  - go get -u github.com/alecthomas/gometalinter
+  - $HOME/gopath/bin/gometalinter -i
+  - go get -u github.com/axw/gocov/gocov
+  - go get -u github.com/mattn/goveralls
+  - go get -u golang.org/x/tools/cmd/cover
 
 install:
   - ln -s _vendor vendor
@@ -19,4 +21,5 @@ before_script:
   - mkdir -p /home/travis/.config/testorg/testservice && sudo chown -R $USER /home/travis/.config/testorg/testservice
 
 script:
+  - $HOME/gopath/bin/gometalinter --deadline=20s ./...
   - $HOME/gopath/bin/goveralls -service=travis-ci
