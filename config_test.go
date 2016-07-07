@@ -37,6 +37,10 @@ const (
 	fileMode os.FileMode = 0644
 )
 
+func testUnmarshaller(data []byte, v interface{}) (err error) {
+	return
+}
+
 var _ = Describe("Config", func() {
 	var (
 		cfg         Config
@@ -45,6 +49,13 @@ var _ = Describe("Config", func() {
 	)
 
 	BeforeEach(func() {
+		tmpDir, err := ioutil.TempDir("", "config_test")
+		Ω(err).Should(BeNil())
+		testHomeDir = tmpDir
+		testUser = &user.User{
+			HomeDir: testHomeDir,
+		}
+
 		cfg = Config{
 			Organization: organization,
 			Service:      service,
@@ -52,12 +63,7 @@ var _ = Describe("Config", func() {
 				Extension:    yamlExtension,
 				Unmarshaller: yaml.Unmarshal,
 			},
-		}
-		tmpDir, err := ioutil.TempDir("", "config_test")
-		Ω(err).Should(BeNil())
-		testHomeDir = tmpDir
-		testUser = &user.User{
-			HomeDir: testHomeDir,
+			pathExpander: func(p string) string { return expandUser(testUser, p) },
 		}
 	})
 
@@ -81,5 +87,13 @@ var _ = Describe("Config", func() {
 
 	It("returns the right file name", func() {
 		Ω(cfg.fileName()).Should(Equal("config.yaml"))
+	})
+
+	It("returns the right path for the system config", func() {
+		Ω(cfg.systemURI().Path).Should(Equal(systemPath))
+	})
+
+	It("returns the right path for the user config", func() {
+		Ω(cfg.userURI().Path).Should(Equal(filepath.Join(testHomeDir, ".config", organization, service, "config.yaml")))
 	})
 })

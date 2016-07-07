@@ -44,6 +44,9 @@ type Config struct {
 
 	// describes the type of config file to unmarshal
 	FileFormat *FileFormat
+
+	// used for mocking expanduser
+	pathExpander func(p string) string
 }
 
 var (
@@ -203,17 +206,22 @@ func (c Config) fileName() string {
 	return fmt.Sprintf("%s.%s", fileNamePrefix, c.FileFormat.Extension)
 }
 
-func (c Config) systemURI() (uri url.URL) {
+func (c Config) systemURI() (uri *url.URL) {
 	path := filepath.Join(SystemBase, c.Organization, c.Service, c.fileName())
-	uri = url.URL{Path: path, Scheme: "file"}
+	uri = &url.URL{Path: path, Scheme: "file"}
 	return
 }
 
-func (c Config) userURI() (uri url.URL) {
-	userBase := ExpandUser(UserBase)
+func (c Config) userURI() (uri *url.URL) {
+	var userBase string
+	if c.pathExpander == nil {
+		userBase = ExpandUser(UserBase)
+	} else {
+		userBase = c.pathExpander(UserBase)
+	}
 
 	path := filepath.Join(userBase, c.Organization, c.Service, c.fileName())
-	uri = url.URL{Path: path, Scheme: "file"}
+	uri = &url.URL{Path: path, Scheme: "file"}
 	return
 }
 
