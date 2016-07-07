@@ -81,7 +81,7 @@ func readHTTP(uri string) (data []byte, err error) {
 		return
 	}()
 
-	data = make([]byte, 0, resp.ContentLength)
+	data = make([]byte, resp.ContentLength)
 	bytesRead, err := io.ReadFull(resp.Body, data)
 	if err != nil {
 		return
