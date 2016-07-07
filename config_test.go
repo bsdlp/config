@@ -26,12 +26,9 @@ type burritoConfig struct {
 
 const (
 	correctEnvVar  string = "TESTORG_TESTSERVICE_CONFIG_URI"
-	systemBaseDir  string = "/etc/"
-	systemDir      string = "/etc/testorg/testservice/"
 	systemPath     string = "/etc/testorg/testservice/config.yaml"
 	organization   string = "testorg"
 	service        string = "testservice"
-	testUsername   string = "testuser"
 	yamlExtension  string = "yaml"
 	testConfigData string = `---
 has_burrito: true
@@ -47,11 +44,6 @@ var testConfigDataUnmarshalled = &configData{
 	HasBurrito:   true,
 	FavoriteHero: "roadhog",
 }
-
-const (
-	dirMode  os.FileMode = 0755
-	fileMode os.FileMode = 0644
-)
 
 func testUnmarshaller(data []byte, v interface{}) (err error) {
 	return
@@ -99,7 +91,7 @@ var _ = Describe("Config", func() {
 	})
 
 	It("looks for the right envvar", func() {
-		Ω(cfg.EnvVar()).Should(Equal("TESTORG_TESTSERVICE_CONFIG_URI"))
+		Ω(cfg.EnvVar()).Should(Equal(correctEnvVar))
 		Ω(Config{Service: "testservice"}.EnvVar()).Should(Equal("TESTSERVICE_CONFIG_URI"))
 	})
 
