@@ -43,6 +43,11 @@ type configData struct {
 	FavoriteHero string `yaml:"favorite_hero"`
 }
 
+var testConfigDataUnmarshalled = &configData{
+	HasBurrito:   true,
+	FavoriteHero: "roadhog",
+}
+
 const (
 	dirMode  os.FileMode = 0755
 	fileMode os.FileMode = 0644
@@ -102,6 +107,16 @@ var _ = Describe("Config", func() {
 		Ω(cfg.fileName()).Should(Equal("config.yaml"))
 	})
 
+	It("returns a default file name if FileFormat is nil", func() {
+		cfg.FileFormat = nil
+		Ω(cfg.fileName()).Should(Equal("config"))
+	})
+
+	It("returns a default file name if file extension is empty", func() {
+		cfg.FileFormat.Extension = ""
+		Ω(cfg.fileName()).Should(Equal("config"))
+	})
+
 	It("returns the right path for the system config", func() {
 		Ω(cfg.systemURI().Path).Should(Equal(systemPath))
 	})
@@ -144,6 +159,25 @@ var _ = Describe("Config", func() {
 			data, parseErr := uriParser(f.Name())
 			Ω(parseErr).Should(BeNil())
 			Ω(data).Should(Equal([]byte(testConfigData)))
+		})
+
+		It("checks to see if unmarshaller is set correctly", func() {
+			td := new(configData)
+			err := load(nil, f.Name(), td)
+			Ω(err).Should(Equal(ErrNilUnmarshaller))
+		})
+
+		It("checks to make sure dst is a pointer", func() {
+			td := new(configData)
+			err := load(yaml.Unmarshal, f.Name(), *td)
+			Ω(err).Should(Equal(ErrNotAPointer))
+		})
+
+		It("loads config data", func() {
+			td := new(configData)
+			err := load(yaml.Unmarshal, f.Name(), td)
+			Ω(err).Should(BeNil())
+			Ω(td).Should(Equal(testConfigDataUnmarshalled))
 		})
 	})
 })
